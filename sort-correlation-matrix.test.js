@@ -1,7 +1,7 @@
 const sortCorrelationMatrix = require("./sort-correlation-matrix.js")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
 const getMagnitude = require("./get-magnitude.js")
-const { DataFrame, normal, max, int, random } = require("js-math-tools")
+const { DataFrame, normal, max, int, random, sort } = require("js-math-tools")
 
 test("sorts a random correlation matrix", () => {
   const x = normal([100, 25])
@@ -9,6 +9,10 @@ test("sorts a random correlation matrix", () => {
   c.index = c.columns
   const s = sortCorrelationMatrix(c)
   const m2 = getMagnitude(s.values[s.values.length - 1])
+
+  expect(sort(s.columns)).toStrictEqual(sort(c.columns))
+  expect(sort(s.index)).toStrictEqual(sort(c.index))
+  expect(s.shape).toStrictEqual(c.shape)
 
   s.values.forEach((row, i) => {
     const m1 = getMagnitude(row)
@@ -34,6 +38,10 @@ test("sorts a random correlation matrix that has missing values", () => {
   c.index = c.columns
   const s = sortCorrelationMatrix(c)
   const m2 = getMagnitude(s.values[s.values.length - 1])
+
+  expect(sort(s.columns)).toStrictEqual(sort(c.columns))
+  expect(sort(s.index)).toStrictEqual(sort(c.index))
+  expect(s.shape).toStrictEqual(c.shape)
 
   s.values.forEach((row, i) => {
     const m1 = getMagnitude(row)

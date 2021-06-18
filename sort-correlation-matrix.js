@@ -9,6 +9,8 @@ let {
   DataFrame,
   isEqual,
   transpose,
+  argmax,
+  reverse,
 } = require("js-math-tools")
 
 function sortCorrelationMatrix(correlations) {
@@ -38,59 +40,44 @@ function sortCorrelationMatrix(correlations) {
   while (freeRows.length > 0) {
     // get row with greatest 2-norm
     if (fixedRows.length === 0) {
-      let twoNormCache = {}
+      let highestTwoNorm = 0
+      let rowWithHighestTwoNorm = freeRows[0]
 
-      freeRows = sort(freeRows, (a, b) => {
-        let aIndex = correlations.index.indexOf(a)
-        let bIndex = correlations.index.indexOf(b)
-        let row1 = correlations.values[aIndex]
-        let row2 = correlations.values[bIndex]
+      freeRows.forEach((rowName, i) => {
+        const values = correlations.values[i]
+        const twoNorm = sum(pow(values, 2))
 
-        let sum1 = 0
-        let sum2 = 0
-
-        if (twoNormCache[a]) {
-          sum1 = twoNormCache[a]
-        } else {
-          sum1 = sum(pow(row1, 2))
-          twoNormCache[a] = sum1
+        if (twoNorm > highestTwoNorm) {
+          highestTwoNorm = twoNorm
+          rowWithHighestTwoNorm = rowName
         }
-
-        if (twoNormCache[b]) {
-          sum2 = twoNormCache[b]
-        } else {
-          sum2 = sum(pow(row2, 2))
-          twoNormCache[b] = sum2
-        }
-
-        if (sum1 < sum2) return 1
-        if (sum1 > sum2) return -1
-        return 0
       })
+
+      fixedRows.push(rowWithHighestTwoNorm)
+      freeRows.splice(freeRows.indexOf(rowWithHighestTwoNorm), 1)
     }
 
     // get free row with highest correlation with first fixed row
     // and fix it
     else {
-      let firstFixedRowIndex = correlations.columns.indexOf(fixedRows[0])
+      const j = correlations.index.indexOf(fixedRows[fixedRows.length - 1])
+      const values = copy(correlations.values[j])
+      values[j] = -2
+      let k = argmax(values)[0]
 
-      freeRows = sort(freeRows, (a, b) => {
-        let aIndex = correlations.index.indexOf(a)
-        let bIndex = correlations.index.indexOf(b)
-        let v1 = correlations.values[aIndex][firstFixedRowIndex]
-        let v2 = correlations.values[bIndex][firstFixedRowIndex]
-        if (v1 < v2) return 1
-        if (v1 > v2) return -1
-        return 0
-      })
+      while (fixedRows.indexOf(correlations.index[k]) > -1) {
+        values[k] = -2
+        k = argmax(values)[0]
+      }
+
+      const nextRow = correlations.index[k]
+      fixedRows.push(nextRow)
+      freeRows.splice(freeRows.indexOf(nextRow), 1)
     }
-
-    fixedRows.splice(0, 0, freeRows[0])
-    freeRows.splice(0, 1)
   }
 
-  correlations = correlations.get(fixedRows, fixedRows)
-  return correlations
+  fixedRows = reverse(fixedRows)
+  return correlations.get(fixedRows, fixedRows)
 }
 
 module.exports = sortCorrelationMatrix

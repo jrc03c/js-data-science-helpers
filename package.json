@@ -1,5 +1,5 @@
 {
-  "name": "js-data-science-helpers",
+  "name": "@jrc03c/js-data-science-helpers",
   "version": "0.0.1",
   "description": "",
   "main": "src/index.js",

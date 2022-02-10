@@ -8,7 +8,7 @@ let {
   clamp,
   correl,
   dropMissingPairwise,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function getCorrelationMatrix(a, b) {
   if (isUndefined(b)) b = copy(a)

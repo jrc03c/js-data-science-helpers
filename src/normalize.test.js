@@ -10,7 +10,7 @@ const {
   abs,
   DataFrame,
   round,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("normalizes an already-normalized vector", () => {
   const x = normalize(normal(1000))
@@ -38,7 +38,7 @@ test("normalizes each column in a DataFrame", () => {
     d: round(random(1000)),
   })
 
-  x = x.apply(col => normalize(col))
+  x = x.apply(col => normalize(col.values))
 
   x.columns.forEach(col => {
     const values = x.get(null, col).values

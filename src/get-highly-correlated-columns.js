@@ -5,7 +5,7 @@ let {
   transpose,
   sort,
   set,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 let containsOnlyNumbers = require("./contains-only-numbers.js")
 

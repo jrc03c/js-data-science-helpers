@@ -6,7 +6,7 @@ let {
   set,
   flatten,
   dropNaN,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function isBinary(x) {
   if (typeof x === "number") {

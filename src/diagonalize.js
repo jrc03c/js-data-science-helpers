@@ -1,4 +1,4 @@
-let { isArray, shape, assert, zeros } = require("js-math-tools")
+let { isArray, shape, assert, zeros } = require("@jrc03c/js-math-tools")
 
 function diagonalize(x) {
   assert(isArray(x), "The `diagonalize` function only works on vectors!")

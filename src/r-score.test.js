@@ -1,5 +1,5 @@
 const rScore = require("./r-score.js")
-const { normal, add, scale, ones } = require("js-math-tools")
+const { normal, add, scale, ones } = require("@jrc03c/js-math-tools")
 
 test("gets the r-score of various arrays", () => {
   const a = normal(1000)

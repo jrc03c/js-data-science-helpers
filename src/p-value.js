@@ -12,7 +12,7 @@ const {
   sqrt,
   pow,
   dropNaNPairwise,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function probability(z) {
   if (abs(z) > 4.1) return 0

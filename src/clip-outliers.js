@@ -16,7 +16,7 @@ let {
   dropNaN,
   sort,
   pow,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 let isBinary = require("./is-binary.js")
 let subtract = (a, b) => add(a, scale(b, -1))

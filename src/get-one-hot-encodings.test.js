@@ -7,7 +7,7 @@ const {
   count,
   indexOf,
   normal,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("one-hot-encodes a small array", () => {
   const name = "test"

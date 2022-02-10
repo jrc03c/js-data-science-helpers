@@ -1,6 +1,6 @@
 const preprocess = require("./preprocess.js")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const makeKey = require("make-key")
+const makeKey = require("@jrc03c/make-key")
 const gramSchmidtOrthonormalize = require("./gram-schmidt-orthonormalize.js")
 const {
   DataFrame,
@@ -17,7 +17,7 @@ const {
   sort,
   flatten,
   ndarray,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 // generate data with these types:
 //   - floats
@@ -300,7 +300,7 @@ test("correctly preprocesses an ugly data set", () => {
     c.values[i][i] = -Infinity
   }
 
-  expect(flatten(c.values).every(v => v <= 0.99)).toBe(true)
+  expect(flatten(c.values).every(v => v < 1)).toBe(true)
 })
 
 test("throws an error when attempting to preprocess non-DataFrames", () => {

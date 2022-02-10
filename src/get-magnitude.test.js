@@ -1,5 +1,5 @@
 const getMagnitude = require("./get-magnitude.js")
-const { zeros, ones, scale, pow, normal } = require("js-math-tools")
+const { zeros, ones, scale, pow, normal } = require("@jrc03c/js-math-tools")
 const divide = (a, b) => scale(a, pow(b, -1))
 
 test("gets the magnitudes of various arrays", () => {

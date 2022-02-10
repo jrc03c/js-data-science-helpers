@@ -9,7 +9,7 @@ const {
   chop,
   distance,
   shape,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("gets a correlation matrix from a matrix containing identical columns", () => {
   const row = normal(100)

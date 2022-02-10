@@ -8,7 +8,7 @@ let {
   transpose,
   clamp,
   dropMissingPairwise,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function getPValueMatrix(a, b) {
   if (isUndefined(b)) b = copy(a)

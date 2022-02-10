@@ -1,5 +1,5 @@
 const diagonalize = require("./diagonalize.js")
-const { sort, set, shape, normal, flatten } = require("js-math-tools")
+const { sort, set, shape, normal, flatten } = require("@jrc03c/js-math-tools")
 
 test("diagonalizes a small vector", () => {
   const x = [1, 2, 3]

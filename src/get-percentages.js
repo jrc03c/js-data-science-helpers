@@ -1,4 +1,4 @@
-let { count } = require("js-math-tools")
+let { count } = require("@jrc03c/js-math-tools")
 
 function getPercentages(x) {
   let counts = count(x)

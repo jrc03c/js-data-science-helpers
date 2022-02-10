@@ -1,4 +1,4 @@
-let { assert, isArray, flatten, set } = require("js-math-tools")
+let { assert, isArray, flatten, set } = require("@jrc03c/js-math-tools")
 
 function containsOnlyNumbers(x) {
   assert(isArray(x), "The `containsOnlyNumbers` only works on arrays!")

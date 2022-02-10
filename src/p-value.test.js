@@ -1,5 +1,5 @@
 const pValue = require("./p-value.js")
-const { normal, scale, add } = require("js-math-tools")
+const { normal, scale, add } = require("@jrc03c/js-math-tools")
 
 test("gets a p-value for pairs of vectors", () => {
   const a = normal(1000)

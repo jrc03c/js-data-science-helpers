@@ -10,7 +10,7 @@ const {
   dropMissing,
   dropNaN,
   float,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 const nullValues = ["null", "none", "nan", "na", "n/a", "", "undefined"]
 const booleanValues = ["true", "false", "yes", "no"]

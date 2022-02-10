@@ -14,7 +14,7 @@ let {
   isArray,
   correl,
   dropMissing,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 const getOneHotEncodings = require("./get-one-hot-encodings.js")
 const clipOutliers = require("./clip-outliers.js")
@@ -28,9 +28,9 @@ function preprocess(df) {
 
   const types = {}
 
-  df = df.apply((col, colName) => {
-    const results = inferType(col)
-    types[colName] = results.type
+  df = df.apply(col => {
+    const results = inferType(col.values)
+    types[col.name] = results.type
     return results.values
   })
 

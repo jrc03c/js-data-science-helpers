@@ -1,4 +1,4 @@
-let { assert, isArray, sqrt, sum, pow } = require("js-math-tools")
+let { assert, isArray, sqrt, sum, pow } = require("@jrc03c/js-math-tools")
 let containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function getMagnitude(x) {

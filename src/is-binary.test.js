@@ -6,7 +6,7 @@ const {
   zeros,
   ones,
   normal,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("checks whether various things are binary", () => {
   expect(isBinary(0)).toBe(true)

@@ -6,7 +6,7 @@ let {
   isArray,
   shape,
   isUndefined,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function getOneHotEncodings(name, values) {
   assert(

@@ -11,7 +11,7 @@ let {
   transpose,
   argmax,
   reverse,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function sortCorrelationMatrix(correlations) {
   assert(

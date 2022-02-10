@@ -1,4 +1,4 @@
-let { assert, isArray, shape, scale, dot } = require("js-math-tools")
+let { assert, isArray, shape, scale, dot } = require("@jrc03c/js-math-tools")
 let containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function project(v, u) {

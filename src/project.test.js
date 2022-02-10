@@ -15,7 +15,7 @@ const {
   clamp,
   abs,
   distance,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("projects a small vector onto another", () => {
   const a = [3, 4]

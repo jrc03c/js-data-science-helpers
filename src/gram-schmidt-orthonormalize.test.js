@@ -12,7 +12,7 @@ const {
   chop,
   identity,
   distance,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("orthonormalizes some closely related vectors", () => {
   const a = normal(10000)

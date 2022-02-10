@@ -8,7 +8,7 @@ const {
   normal,
   clamp,
   int,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 test("attempts to clip outliers where there are none", () => {
   const x = [2, 2, 2, 3, 3, 3, 4, 4, 4]

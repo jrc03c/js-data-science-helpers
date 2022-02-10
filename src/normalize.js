@@ -7,7 +7,7 @@ let {
   std,
   isUndefined,
   dropNaN,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function normalize(x) {
   assert(isArray(x), "The `normalize` function only works on vectors!")

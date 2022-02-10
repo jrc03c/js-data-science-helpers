@@ -13,7 +13,7 @@ let {
   shape,
   assert,
   isArray,
-} = require("js-math-tools")
+} = require("@jrc03c/js-math-tools")
 
 function rScore(xtrue, xpred) {
   assert(

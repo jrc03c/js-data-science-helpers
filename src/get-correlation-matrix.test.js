@@ -1,14 +1,15 @@
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
 const gramSchmidtOrthonormalize = require("./gram-schmidt-orthonormalize.js")
+
 const {
-  normal,
-  ones,
-  transpose,
-  round,
-  identity,
   chop,
   distance,
+  identity,
+  normal,
+  ones,
+  round,
   shape,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 test("gets a correlation matrix from a matrix containing identical columns", () => {

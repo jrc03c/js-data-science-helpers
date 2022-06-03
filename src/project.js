@@ -1,5 +1,5 @@
-let { assert, isArray, shape, scale, dot } = require("@jrc03c/js-math-tools")
-let containsOnlyNumbers = require("./contains-only-numbers.js")
+const { assert, dot, isArray, scale, shape } = require("@jrc03c/js-math-tools")
+const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function project(v, u) {
   assert(isArray(v), "`project` only works on vectors!")

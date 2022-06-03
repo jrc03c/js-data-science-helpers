@@ -1,5 +1,5 @@
+const { add, normal, ones, scale } = require("@jrc03c/js-math-tools")
 const rScore = require("./r-score.js")
-const { normal, add, scale, ones } = require("@jrc03c/js-math-tools")
 
 test("gets the r-score of various arrays", () => {
   const a = normal(1000)
@@ -17,7 +17,7 @@ test("gets the r-score of various arrays", () => {
 
   const xTrue = ones([10, 10, 10])
   const xPred = normal([10, 10, 10])
-  expect(rScore(xTrue, xPred)).toBe(0)
+  expect(isNaN(rScore(xTrue, xPred))).toBe(true)
 })
 
 test("throw an error when attempting to get the r-score of non-numerical non-arrays", () => {

@@ -1,12 +1,5 @@
+const { identity, normal, ones, zeros } = require("@jrc03c/js-math-tools")
 const isBinary = require("./is-binary.js")
-const {
-  random,
-  round,
-  identity,
-  zeros,
-  ones,
-  normal,
-} = require("@jrc03c/js-math-tools")
 
 test("checks whether various things are binary", () => {
   expect(isBinary(0)).toBe(true)

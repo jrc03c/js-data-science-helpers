@@ -1,5 +1,5 @@
-let { assert, isArray, sqrt, sum, pow } = require("@jrc03c/js-math-tools")
-let containsOnlyNumbers = require("./contains-only-numbers.js")
+const { assert, isArray, pow, sqrt, sum } = require("@jrc03c/js-math-tools")
+const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function getMagnitude(x) {
   assert(isArray(x), "`getMagnitude` only works on vectors!")

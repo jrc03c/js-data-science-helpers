@@ -1,17 +1,18 @@
-const gramSchmidtOrthonormalize = require("./gram-schmidt-orthonormalize.js")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
+const gramSchmidtOrthonormalize = require("./gram-schmidt-orthonormalize.js")
+
 const {
-  normal,
-  transpose,
-  correl,
   abs,
-  scale,
   add,
-  shape,
-  round,
   chop,
-  identity,
+  correl,
   distance,
+  identity,
+  normal,
+  round,
+  scale,
+  shape,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 test("orthonormalizes some closely related vectors", () => {

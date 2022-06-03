@@ -1,23 +1,16 @@
-let {
+const {
   assert,
-  DataFrame,
-  transpose,
-  isUndefined,
-  set,
-  isEqual,
-  sort,
-  count,
   copy,
-  isNumber,
-  isBoolean,
-  isString,
-  isArray,
   correl,
+  DataFrame,
   dropMissing,
+  isEqual,
+  set,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
-const getOneHotEncodings = require("./get-one-hot-encodings.js")
 const clipOutliers = require("./clip-outliers.js")
+const getOneHotEncodings = require("./get-one-hot-encodings.js")
 const inferType = require("./infer-type.js")
 
 function preprocess(df) {

@@ -1,11 +1,12 @@
-const sortCorrelationMatrix = require("./sort-correlation-matrix.js")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
 const getMagnitude = require("./get-magnitude.js")
+const sortCorrelationMatrix = require("./sort-correlation-matrix.js")
+
 const {
   DataFrame,
-  normal,
-  max,
   int,
+  max,
+  normal,
   random,
   sort,
 } = require("@jrc03c/js-math-tools")

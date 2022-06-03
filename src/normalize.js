@@ -1,12 +1,10 @@
-let {
+const {
   assert,
-  isArray,
-  shape,
-  Series,
-  mean,
-  std,
-  isUndefined,
   dropNaN,
+  isArray,
+  mean,
+  shape,
+  std,
 } = require("@jrc03c/js-math-tools")
 
 function normalize(x) {
@@ -18,9 +16,9 @@ function normalize(x) {
   )
 
   // note that this is a "missing-aware" function!
-  let nonMissingValues = dropNaN(x)
-  let m = mean(nonMissingValues)
-  let s = std(nonMissingValues)
+  const nonMissingValues = dropNaN(x)
+  const m = mean(nonMissingValues)
+  const s = std(nonMissingValues)
 
   if (s === 0) return x
 

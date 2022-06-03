@@ -1,13 +1,13 @@
-let {
+const {
   assert,
   DataFrame,
   isEqual,
-  transpose,
-  sort,
   set,
+  sort,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
-let containsOnlyNumbers = require("./contains-only-numbers.js")
+const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function getHighlyCorrelatedColumns(correlations) {
   assert(
@@ -30,17 +30,17 @@ function getHighlyCorrelatedColumns(correlations) {
     "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must be symmetrical!"
   )
 
-  let out = {}
+  const out = {}
 
   for (let i = 0; i < correlations.index.length; i++) {
     for (let j = 0; j < correlations.columns.length; j++) {
       if (i !== j) {
-        let value = correlations.values[i][j]
+        const value = correlations.values[i][j]
 
         // note that this only detects columns that are highly POSITIVELY correlated!
         if (1 - value < 1e-5) {
-          let rowName = correlations.index[i]
-          let colName = correlations.columns[j]
+          const rowName = correlations.index[i]
+          const colName = correlations.columns[j]
           if (!out[rowName]) out[rowName] = []
           if (!out[colName]) out[colName] = []
           out[rowName].push(colName)

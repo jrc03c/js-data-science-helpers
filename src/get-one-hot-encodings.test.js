@@ -1,12 +1,13 @@
 const getOneHotEncodings = require("./get-one-hot-encodings.js")
+
 const {
-  range,
-  sum,
-  random,
-  int,
   count,
   indexOf,
+  int,
   normal,
+  random,
+  range,
+  sum,
 } = require("@jrc03c/js-math-tools")
 
 test("one-hot-encodes a small array", () => {

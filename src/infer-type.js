@@ -1,15 +1,11 @@
 const {
   assert,
-  isArray,
-  shape,
-  isString,
   count,
-  isBoolean,
-  isNumber,
-  argmax,
-  dropMissing,
-  dropNaN,
   float,
+  isArray,
+  isNumber,
+  isString,
+  shape,
 } = require("@jrc03c/js-math-tools")
 
 const nullValues = ["null", "none", "nan", "na", "n/a", "", "undefined"]

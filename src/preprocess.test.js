@@ -1,22 +1,19 @@
-const preprocess = require("./preprocess.js")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
 const makeKey = require("@jrc03c/make-key")
-const gramSchmidtOrthonormalize = require("./gram-schmidt-orthonormalize.js")
+const preprocess = require("./preprocess.js")
+
 const {
-  DataFrame,
-  random,
-  normal,
   add,
-  scale,
-  round,
-  int,
-  range,
-  shuffle,
-  shape,
-  transpose,
-  sort,
+  DataFrame,
   flatten,
+  int,
   ndarray,
+  normal,
+  random,
+  range,
+  scale,
+  sort,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 // generate data with these types:

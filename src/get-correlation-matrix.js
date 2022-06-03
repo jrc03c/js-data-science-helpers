@@ -1,13 +1,13 @@
-let {
+const {
   assert,
-  isUndefined,
-  copy,
-  isArray,
-  shape,
-  transpose,
   clamp,
+  copy,
   correl,
   dropMissingPairwise,
+  isArray,
+  isUndefined,
+  shape,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 function getCorrelationMatrix(a, b) {
@@ -29,17 +29,17 @@ function getCorrelationMatrix(a, b) {
   )
 
   // note: this produces a "missing-aware" correlation matrix!
-  let out = []
-  let aTemp = transpose(a)
-  let bTemp = transpose(b)
+  const out = []
+  const aTemp = transpose(a)
+  const bTemp = transpose(b)
 
   aTemp.forEach(row1 => {
-    let correlations = []
+    const correlations = []
 
     bTemp.forEach(row2 => {
       try {
-        let [row1Temp, row2Temp] = dropMissingPairwise(row1, row2)
-        let r = clamp(correl(row1Temp, row2Temp), -1, 1)
+        const [row1Temp, row2Temp] = dropMissingPairwise(row1, row2)
+        const r = clamp(correl(row1Temp, row2Temp), -1, 1)
         assert(r >= -1 && r <= 1, "Uh-oh!")
         correlations.push(r)
       } catch (e) {

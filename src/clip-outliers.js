@@ -1,26 +1,24 @@
-let {
-  assert,
-  isNumber,
-  isArray,
-  shape,
-  isUndefined,
-  median,
+const {
   abs,
   add,
-  scale,
-  copy,
-  int,
-  max,
-  min,
+  assert,
   clamp,
+  copy,
   dropNaN,
-  sort,
+  isArray,
+  isNumber,
+  max,
+  median,
+  min,
   pow,
+  scale,
+  shape,
+  sort,
 } = require("@jrc03c/js-math-tools")
 
-let isBinary = require("./is-binary.js")
-let subtract = (a, b) => add(a, scale(b, -1))
-let divide = (a, b) => scale(a, pow(b, -1))
+const isBinary = require("./is-binary.js")
+const divide = (a, b) => scale(a, pow(b, -1))
+const subtract = (a, b) => add(a, scale(b, -1))
 
 function clipOutliers(x, maxScore) {
   maxScore = maxScore || 5
@@ -29,17 +27,17 @@ function clipOutliers(x, maxScore) {
   assert(isArray(x), "`x` must be a one-dimensional array!")
   assert(shape(x).length === 1, "`x` must be a one-dimensional array!")
 
-  let numericalValues = dropNaN(x)
+  const numericalValues = dropNaN(x)
   if (isBinary(numericalValues)) return [x, false]
   if (numericalValues.length === 0) return [x, false]
 
-  let xMedian = median(numericalValues)
+  const xMedian = median(numericalValues)
   let xMad = median(abs(subtract(numericalValues, xMedian)))
 
   if (xMad === 0) {
-    let temp = sort(copy(numericalValues))
-    let low = temp.filter(value => value < xMedian)
-    let high = temp.filter(value => value > xMedian)
+    const temp = sort(copy(numericalValues))
+    const low = temp.filter(value => value < xMedian)
+    const high = temp.filter(value => value > xMedian)
     let before = xMedian
     let after = xMedian
 
@@ -50,10 +48,10 @@ function clipOutliers(x, maxScore) {
     if (xMad === 0) return [x, false]
   }
 
-  let score = max(divide(abs(subtract(numericalValues, xMedian)), xMad))
+  const score = max(divide(abs(subtract(numericalValues, xMedian)), xMad))
 
   if (score > maxScore) {
-    let out = x.map(v => {
+    const out = x.map(v => {
       if (typeof v === "number") {
         return clamp(v, xMedian - maxScore * xMad, xMedian + maxScore * xMad)
       } else {

@@ -1,11 +1,12 @@
 const inferType = require("./infer-type.js")
+
 const {
+  copy,
   float,
   int,
+  normal,
   random,
   range,
-  copy,
-  normal,
 } = require("@jrc03c/js-math-tools")
 
 test("correctly infers a variety of data types from strings", () => {

@@ -1,11 +1,11 @@
-let {
+const {
   assert,
-  sort,
-  set,
-  isString,
   isArray,
-  shape,
+  isString,
   isUndefined,
+  set,
+  shape,
+  sort,
 } = require("@jrc03c/js-math-tools")
 
 function getOneHotEncodings(name, values) {
@@ -19,9 +19,10 @@ function getOneHotEncodings(name, values) {
     "The second parameter passed into the `getOneHotEncodings` function must be a one-dimensional array of values."
   )
 
-  let out = {}
-  let colToDrop = name + "_" + values[0]
-  let colNames = sort(set(values))
+  const out = {}
+  const colToDrop = name + "_" + values[0]
+
+  const colNames = sort(set(values))
     .filter(v => !isUndefined(v))
     .map(v => name + "_" + v)
     .filter(v => v !== colToDrop)

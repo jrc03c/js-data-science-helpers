@@ -1,15 +1,16 @@
 const normalize = require("./normalize.js")
+
 const {
-  range,
-  random,
-  normal,
-  scale,
-  add,
-  mean,
-  std,
   abs,
+  add,
   DataFrame,
+  mean,
+  normal,
+  random,
+  range,
   round,
+  scale,
+  std,
 } = require("@jrc03c/js-math-tools")
 
 test("normalizes an already-normalized vector", () => {

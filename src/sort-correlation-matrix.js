@@ -1,16 +1,15 @@
-let {
+const {
+  argmax,
   assert,
-  max,
-  min,
   copy,
-  sort,
-  sum,
-  pow,
   DataFrame,
   isEqual,
-  transpose,
-  argmax,
+  max,
+  min,
+  pow,
   reverse,
+  sum,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 function sortCorrelationMatrix(correlations) {
@@ -34,8 +33,8 @@ function sortCorrelationMatrix(correlations) {
     "The correlations matrix passed into the `sortCorrelationMatrix` function must not contain values less than -1 or greater than 1!"
   )
 
-  let freeRows = copy(correlations.index)
-  let fixedRows = []
+  const freeRows = copy(correlations.index)
+  const fixedRows = []
 
   while (freeRows.length > 0) {
     // get row with greatest 2-norm
@@ -76,8 +75,8 @@ function sortCorrelationMatrix(correlations) {
     }
   }
 
-  fixedRows = reverse(fixedRows)
-  return correlations.get(fixedRows, fixedRows)
+  const reversedFixedRows = reverse(fixedRows)
+  return correlations.get(reversedFixedRows, reversedFixedRows)
 }
 
 module.exports = sortCorrelationMatrix

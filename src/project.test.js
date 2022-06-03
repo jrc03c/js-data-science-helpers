@@ -1,20 +1,18 @@
-const project = require("./project.js")
 const getMagnitude = require("./get-magnitude.js")
+const project = require("./project.js")
+
 const divide = (a, b) => scale(a, pow(b, -1))
 const normalize = x => divide(x, getMagnitude(x))
 const similarity = (a, b) => dot(a, b) / (getMagnitude(a) * getMagnitude(b))
 
 const {
-  sqrt,
-  scale,
-  pow,
-  normal,
-  random,
-  dot,
-  arccos,
-  clamp,
   abs,
   distance,
+  dot,
+  normal,
+  pow,
+  random,
+  scale,
 } = require("@jrc03c/js-math-tools")
 
 test("projects a small vector onto another", () => {

@@ -1,13 +1,13 @@
 const clipOutliers = require("./clip-outliers.js")
 
 const {
-  shuffle,
-  sort,
+  clamp,
+  normal,
+  ones,
   random,
   round,
-  normal,
-  clamp,
-  int,
+  shuffle,
+  sort,
 } = require("@jrc03c/js-math-tools")
 
 test("attempts to clip outliers where there are none", () => {
@@ -43,6 +43,14 @@ test("clips outliers", () => {
   const [yPred, wasTransformed] = clipOutliers(x)
   expect(sort(yPred)).toStrictEqual(yTrue)
   expect(wasTransformed).toBe(true)
+})
+
+test("attempts to clip outliers when the data is uniform", () => {
+  const x = ones(1000)
+  const yTrue = x
+  const [yPred, wasTransformed] = clipOutliers(x)
+  expect(yPred).toStrictEqual(yTrue)
+  expect(wasTransformed).toBe(false)
 })
 
 // test("fails to clip outliers when the outlier is the value immediately above or below the median", () => {

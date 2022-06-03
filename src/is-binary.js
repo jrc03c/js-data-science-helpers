@@ -1,11 +1,9 @@
-let {
-  assert,
-  isArray,
-  Series,
-  sort,
-  set,
-  flatten,
+const {
   dropNaN,
+  flatten,
+  isArray,
+  set,
+  sort,
 } = require("@jrc03c/js-math-tools")
 
 function isBinary(x) {
@@ -14,8 +12,8 @@ function isBinary(x) {
   }
 
   if (isArray(x)) {
-    let nonMissingValues = dropNaN(flatten(x))
-    let values = sort(set(nonMissingValues))
+    const nonMissingValues = dropNaN(flatten(x))
+    const values = sort(set(nonMissingValues))
 
     return (
       (values.length === 2 && values[0] === 0 && values[1] === 1) ||

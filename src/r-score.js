@@ -1,19 +1,20 @@
-let containsOnlyNumbers = require("./contains-only-numbers.js")
-let subtract = (a, b) => add(a, scale(b, -1))
-let {
-  sum,
-  pow,
-  mean,
-  sign,
-  sqrt,
+const {
   abs,
   add,
-  scale,
-  isEqual,
-  shape,
   assert,
   isArray,
+  isEqual,
+  mean,
+  pow,
+  scale,
+  shape,
+  sign,
+  sqrt,
+  sum,
 } = require("@jrc03c/js-math-tools")
+
+const containsOnlyNumbers = require("./contains-only-numbers.js")
+const subtract = (a, b) => add(a, scale(b, -1))
 
 function rScore(xtrue, xpred) {
   assert(
@@ -41,10 +42,10 @@ function rScore(xtrue, xpred) {
     "You must pass two same-shaped numerical arrays into the `rScore` function!"
   )
 
-  let num = sum(pow(subtract(xtrue, xpred), 2))
-  let den = sum(pow(subtract(xtrue, mean(xtrue)), 2))
-  if (den === 0) return 0
-  let r2 = 1 - num / den
+  const num = sum(pow(subtract(xtrue, xpred), 2))
+  const den = sum(pow(subtract(xtrue, mean(xtrue)), 2))
+  if (den === 0) return NaN
+  const r2 = 1 - num / den
   return sign(r2) * sqrt(abs(r2))
 }
 

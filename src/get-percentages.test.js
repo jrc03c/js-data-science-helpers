@@ -1,5 +1,5 @@
-const getPercentages = require("./get-percentages.js")
 const { normal } = require("@jrc03c/js-math-tools")
+const getPercentages = require("./get-percentages.js")
 
 test("gets percentages of values in a small array", () => {
   const x = [2, 3, 3, 4]

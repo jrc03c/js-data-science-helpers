@@ -1,6 +1,6 @@
+const { add, DataFrame, normal, scale } = require("@jrc03c/js-math-tools")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
 const getHighlyCorrelatedColumns = require("./get-highly-correlated-columns.js")
-const { DataFrame, normal, add, scale } = require("@jrc03c/js-math-tools")
 
 test("gets highly correlated columns when the columns are identical", () => {
   const temp = normal(1000)

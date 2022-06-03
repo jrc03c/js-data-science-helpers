@@ -1,14 +1,15 @@
 const getPValueMatrix = require("./get-p-value-matrix.js")
+
 const {
-  normal,
-  ones,
-  transpose,
-  round,
-  identity,
+  add,
   chop,
   distance,
+  identity,
+  normal,
+  ones,
+  round,
   shape,
-  add,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 test("gets a p-value matrix from a matrix containing identical columns", () => {

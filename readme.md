@@ -202,6 +202,10 @@ This function doesn't cover every possible edge case, of course; it should proba
 
 Returns a boolean indicating whether or not `x` contains only binary data (0s and 1s). Ignores null / undefined values but does _not_ ignore other non-numerical values (e.g., strings, objects, etc.).
 
+## `isJagged(x)`
+
+Returns a boolean indicating whether or not the array `x` is jagged / ragged (i.e., whether or not it has nested arrays of inconsistent length).
+
 ## `normalize(x)`
 
 Identical to the `standardize` function. Returns a transformed version of vector `x` in which the values have been converted to _z_-scores. In other words: `(x - mean(x)) / stdev(x)`

@@ -11,6 +11,7 @@ const helpers = {
   gramSchmidtOrthonormalize: require("./gram-schmidt-orthonormalize.js"),
   inferType: require("./infer-type.js"),
   isBinary: require("./is-binary.js"),
+  isJagged: require("./is-jagged.js"),
   normalize: require("./normalize.js"),
   preprocess: require("./preprocess.js"),
   project: require("./project.js"),

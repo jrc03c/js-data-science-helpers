@@ -239,7 +239,7 @@ Returns the projection of vector `v` onto vector `u`. Neither `u` nor `v` can in
 
 ## `rScore(xTrue, xPred)`
 
-Returns (roughly) the square root of the _R_<sup>2</sup> value of `xTrue` versus `xPred`. Since _R_<sup>2</sup> can be negative, the actual value returned is `sign(R^2) * sqrt(abs(R^2))`. Neither `xTrue` nor `xPred` can include `NaN` values. The two data sets can be any shape provided that they have the same shape as each other and are not jagged.
+Returns (roughly) the square root of the _R_ <sup>2</sup> value of `xTrue` versus `xPred`. Since _R_ <sup>2</sup> can be negative, the actual value returned is `sign(R^2) * sqrt(abs(R^2))`. Neither `xTrue` nor `xPred` can include `NaN` values. The two data sets can be any shape provided that they have the same shape as each other and are not jagged.
 
 ## `sortCorrelationMatrix(c)`
 

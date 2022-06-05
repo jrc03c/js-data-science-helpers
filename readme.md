@@ -171,7 +171,7 @@ Given a vector `x`, returns an object with these properties:
 
 The inferrable types listed above correspond roughly to the main JS data types, but there are a few exceptions.
 
-First, `"date"` is not a data type in JS. There are `Date` objects, of course, but `typeof new Date()` returns `"object"`. Since dates are commonly stored in data sets and because they come with their own particular set of challenges, I've set these apart as their own data type so that they won't be conflated with other kinds of objects.
+First, "date" is not a data type in JS. There are `Date` objects, of course, but `typeof new Date()` returns "object". Since dates are commonly stored in data sets and because they come with their own particular set of challenges, I've set these apart as their own data type so that they won't be conflated with other kinds of objects.
 
 Second, arrays are not among the inferrable types because `x` is assumed to be a vector, and allowing `x` to have arrays as values makes it difficult to determine whether `x` is supposed to be a vector, matrix, tensor, mixed data structure, etc. If you include an array as a value in `x`, you'll receive an error.
 

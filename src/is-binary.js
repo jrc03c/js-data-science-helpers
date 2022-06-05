@@ -1,5 +1,5 @@
 const {
-  dropNaN,
+  dropMissing,
   flatten,
   isArray,
   set,
@@ -12,7 +12,7 @@ function isBinary(x) {
   }
 
   if (isArray(x)) {
-    const nonMissingValues = dropNaN(flatten(x))
+    const nonMissingValues = dropMissing(flatten(x))
     const values = sort(set(nonMissingValues))
 
     return (

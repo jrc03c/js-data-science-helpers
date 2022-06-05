@@ -17,6 +17,7 @@ const helpers = {
   pValue: require("./p-value.js"),
   rScore: require("./r-score.js"),
   sortCorrelationMatrix: require("./sort-correlation-matrix.js"),
+  standardize: require("./standardize.js"),
 
   dump: function () {
     const self = this

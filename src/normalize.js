@@ -1,24 +1,52 @@
 const {
   assert,
+  DataFrame,
   dropNaN,
   isArray,
   mean,
+  Series,
   shape,
   std,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
+const isJagged = require("./is-jagged.js")
+
+const errorMessage =
+  "The `normalize` function only works on vectors, matrices, Series, or DataFrames!"
+
 function normalize(x) {
-  assert(isArray(x), "The `normalize` function only works on vectors!")
+  if (x instanceof DataFrame || x instanceof Series) {
+    const out = x.copy()
+    out.values = normalize(out.values)
+    return out
+  } else if (isArray(x)) {
+    assert(
+      !isJagged(x),
+      "The `normalize` function doesn't work on jagged arrays!"
+    )
 
-  assert(
-    shape(x).length === 1,
-    "The `normalize` function only works on vectors!"
-  )
+    const xShape = shape(x)
 
-  // note that this is a "missing-aware" function!
-  const nonMissingValues = dropNaN(x)
-  const m = mean(nonMissingValues)
-  const s = std(nonMissingValues)
+    if (xShape.length > 1) {
+      if (xShape.length > 2) {
+        throw new Error(errorMessage)
+      }
+
+      return transpose(transpose(x).map(col => normalize(col)))
+    }
+  } else {
+    throw new Error(errorMessage)
+  }
+
+  const numbers = dropNaN(x)
+
+  if (numbers.length === 0) {
+    return x
+  }
+
+  const m = mean(numbers)
+  const s = std(numbers)
 
   if (s === 0) return x
 

@@ -208,7 +208,7 @@ Returns a boolean indicating whether or not the array `x` is jagged / ragged (i.
 
 ## `normalize(x)`
 
-Identical to the `standardize` function. Returns a transformed version of vector `x` in which the values have been converted to _z_-scores. In other words: `(x - mean(x)) / stdev(x)`
+Identical to the `standardize` function. Returns a transformed version of vector or matrix `x` in which the values have been converted to _z_-scores. In other words: `(x - mean(x)) / stdev(x)` If `x` is a matrix, then each column will be normalized independently of the other columns. `x` can also be a [js-math-tools](https://github.com/jrc03c/js-math-tools) `DataFrame` or `Series`.
 
 ## `pValue(a, b)`
 

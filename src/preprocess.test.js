@@ -98,14 +98,19 @@ test("clips outliers", () => {
   expect(yPred.get(null, 1).values).not.toStrictEqual(b)
 })
 
-test("drops string columns with 100% unique values", () => {
-  const a = random(1000)
-  const b = range(0, 1000).map(i => makeKey(8))
-  const x = new DataFrame({ a, b })
-  const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a"])
-  expect(yPred.get(null, 0).values).toStrictEqual(a)
-})
+// ----------------------------------------------------------------------------
+// UPDATE 2022-07-28: This test is being deactivated because I've removed this
+// behavior from the `preprocess` function. See the note in the function itself
+// for more info.
+// ----------------------------------------------------------------------------
+// test("drops string columns with 100% unique values", () => {
+//   const a = random(1000)
+//   const b = range(0, 1000).map(i => makeKey(8))
+//   const x = new DataFrame({ a, b })
+//   const yPred = preprocess(x)
+//   expect(yPred.columns).toStrictEqual(["a"])
+//   expect(yPred.get(null, 0).values).toStrictEqual(a)
+// })
 
 test("one-hot-encodes string columns with 7 or fewer unique values", () => {
   const a = random(1000)

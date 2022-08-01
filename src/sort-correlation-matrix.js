@@ -2,7 +2,6 @@ const {
   argmax,
   assert,
   copy,
-  DataFrame,
   isEqual,
   max,
   min,

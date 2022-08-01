@@ -15,7 +15,7 @@ const inferType = require("./infer-type.js")
 
 function preprocess(df) {
   assert(
-    df instanceof DataFrame,
+    df.apply && df.columns && df.values,
     "You must pass a DataFrame into the `preprocess` function!"
   )
 

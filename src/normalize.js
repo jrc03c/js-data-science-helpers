@@ -1,10 +1,8 @@
 const {
   assert,
-  DataFrame,
   dropNaN,
   isArray,
   mean,
-  Series,
   shape,
   std,
   transpose,
@@ -16,7 +14,7 @@ const errorMessage =
   "The `normalize` function only works on vectors, matrices, Series, or DataFrames!"
 
 function normalize(x) {
-  if (x instanceof DataFrame || x instanceof Series) {
+  if (x.copy && x.values) {
     const out = x.copy()
     out.values = normalize(out.values)
     return out

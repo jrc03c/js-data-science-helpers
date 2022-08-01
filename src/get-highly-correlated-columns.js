@@ -1,6 +1,5 @@
 const {
   assert,
-  DataFrame,
   isEqual,
   set,
   sort,
@@ -11,7 +10,7 @@ const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function getHighlyCorrelatedColumns(correlations) {
   assert(
-    correlations instanceof DataFrame,
+    correlations.values && correlations.index && correlations.columns,
     "You must pass a correlation matrix DataFrame into the `getHighlyCorrelatedColumns` function!"
   )
 

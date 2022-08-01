@@ -14,7 +14,10 @@ const {
 
 function sortCorrelationMatrix(correlations) {
   assert(
-    correlations instanceof DataFrame,
+    correlations.get &&
+      correlations.values &&
+      correlations.columns &&
+      correlations.index,
     "You must pass a DataFrame into the `sortCorrelationMatrix` function!"
   )
 
@@ -25,7 +28,7 @@ function sortCorrelationMatrix(correlations) {
 
   assert(
     isEqual(correlations.columns, correlations.index),
-    "The correlations matrix passed into the `sortCorrelationMatrix` function must be symmetrical!"
+    "The correlations matrix passed into the `sortCorrelationMatrix` function must be symmetrical! (In this case, the values themselves are symmetrical, but the row and column names don't match!)"
   )
 
   assert(

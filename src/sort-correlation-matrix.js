@@ -64,11 +64,11 @@ function sortCorrelationMatrix(correlations) {
       const j = correlations.index.indexOf(fixedRows[fixedRows.length - 1])
       const values = copy(correlations.values[j])
       values[j] = -2
-      let k = argmax(values)[0]
+      let k = argmax(values)
 
       while (fixedRows.indexOf(correlations.index[k]) > -1) {
         values[k] = -2
-        k = argmax(values)[0]
+        k = argmax(values)
       }
 
       const nextRow = correlations.index[k]

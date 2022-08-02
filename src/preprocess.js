@@ -81,19 +81,6 @@ function preprocess(df) {
     const type = types[colName]
 
     if (type === "string") {
-      // ----------------------------------------------------------------------
-      // UPDATE 2022-07-28: I'm commenting this out because there are times
-      // when it's useful to keep in columns consisting entirely of unique
-      // strings (even though they're not useful from a computational point of
-      // view).
-      // ----------------------------------------------------------------------
-      // // if all values are unique, then drop the column
-      // if (nonMissingValuesSet.length === nonMissingValues.length) {
-      //   columns.splice(index, 1)
-      //   x.splice(index, 1)
-      //   continue
-      // }
-
       // if there are fewer than 7 unique values, then one-hot-encode them
       if (nonMissingValuesSet.length <= 7) {
         const encodings = getOneHotEncodings(colName, values)
@@ -109,7 +96,7 @@ function preprocess(df) {
         continue
       }
     } else if (type === "number") {
-      const clippedValues = clipOutliers(values)[0]
+      const clippedValues = clipOutliers(values).values
       x[index] = clippedValues
       let wasHighlyCorrelated = false
 

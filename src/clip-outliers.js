@@ -28,11 +28,12 @@ function clipOutliers(x, maxScore) {
   assert(shape(x).length === 1, "`x` must be a one-dimensional array!")
 
   const numericalValues = dropNaN(x)
-  if (isBinary(numericalValues)) return [x, false]
-  if (numericalValues.length === 0) return [x, false]
+  if (isBinary(numericalValues)) return { values: x, wasClipped: false }
+  if (numericalValues.length === 0) return { values: x, wasClipped: false }
 
   const xMedian = median(numericalValues)
   let xMad = median(abs(subtract(numericalValues, xMedian)))
+  let outlierIsImmediatelyAboveOrBelowMedian = false
 
   if (xMad === 0) {
     const temp = sort(copy(numericalValues))
@@ -45,12 +46,19 @@ function clipOutliers(x, maxScore) {
     if (high.length > 0) after = min(high)
 
     xMad = (after - before) / 2
-    if (xMad === 0) return [x, false]
+
+    if (xMad === 0) {
+      return { values: x, wasClipped: false }
+    }
+
+    outlierIsImmediatelyAboveOrBelowMedian =
+      (xMedian - before) / xMad > maxScore ||
+      (after - xMedian) / xMad > maxScore
   }
 
   const score = max(divide(abs(subtract(numericalValues, xMedian)), xMad))
 
-  if (score > maxScore) {
+  if (score > maxScore || outlierIsImmediatelyAboveOrBelowMedian) {
     const out = x.map(v => {
       if (typeof v === "number") {
         return clamp(v, xMedian - maxScore * xMad, xMedian + maxScore * xMad)
@@ -59,14 +67,10 @@ function clipOutliers(x, maxScore) {
       }
     })
 
-    return [out, true]
+    return { values: out, wasClipped: true }
   } else {
-    return [x, false]
+    return { values: x, wasClipped: false }
   }
 }
-
-// console.warn(
-//   "The `clipOutliers` function does not handle at least one edge case: in cases where an outlier is the value immediately above or below the median, the `clipOutliers` function will fail to transform the data! This is a known problem, but we haven't found a fix for it yet. :("
-// )
 
 module.exports = clipOutliers

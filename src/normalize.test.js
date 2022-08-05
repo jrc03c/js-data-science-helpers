@@ -44,7 +44,7 @@ test("normalizes a vector", () => {
 })
 
 test("normalizes a vector with only 1 unique value", () => {
-  const x = range(0, 1000).map(i => 5)
+  const x = range(0, 1000).map(() => 5)
   const yPred = normalize(x)
   expect(yPred).toStrictEqual(x)
 })

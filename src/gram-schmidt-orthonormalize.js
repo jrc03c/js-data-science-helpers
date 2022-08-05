@@ -33,7 +33,7 @@ function gramSchmidtOrthonormalize(x) {
   const temp = transpose(x)
   const bases = []
 
-  temp.forEach((v, i) => {
+  temp.forEach(v => {
     let vCopy = copy(v)
 
     bases.forEach(basis => {

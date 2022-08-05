@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest && eslint src",
     "build": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify",
     "watch": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify --watch"
   },
@@ -16,6 +16,7 @@
     "@jrc03c/make-key": "github:jrc03c/make-key"
   },
   "devDependencies": {
-    "esbuild": "^0.14.42"
+    "esbuild": "^0.14.42",
+    "eslint": "^8.21.0"
   }
 }

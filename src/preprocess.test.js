@@ -50,7 +50,7 @@ test("drops highly correlated columns", () => {
 
 test("drops columns with less than 15 non-missing values", () => {
   const a = random(1000)
-  const b = range(0, 1000).map(i => NaN)
+  const b = range(0, 1000).map(() => NaN)
 
   for (let i = 0; i < 10; i++) {
     b[int(random() * b.length)] = random()
@@ -64,10 +64,10 @@ test("drops columns with less than 15 non-missing values", () => {
 
 test("drops empty columns", () => {
   const a = random(1000)
-  const b = range(0, 1000).map(i => null)
+  const b = range(0, 1000).map(() => null)
   const c = random(1000)
-  const d = range(0, 1000).map(i => undefined)
-  const e = range(0, 1000).map(i => NaN)
+  const d = range(0, 1000).map(() => undefined)
+  const e = range(0, 1000).map(() => NaN)
   const x = new DataFrame({ a, b, c, d, e })
   const yPred = preprocess(x)
   expect(yPred.columns).toStrictEqual(["a", "c"])
@@ -78,9 +78,9 @@ test("drops empty columns", () => {
 test("drops columns with only 1 unique value", () => {
   const a = random(1000)
   const r = random()
-  const b = range(0, 1000).map(i => r)
+  const b = range(0, 1000).map(() => r)
   const k = makeKey(8)
-  const c = range(0, 1000).map(i => k)
+  const c = range(0, 1000).map(() => k)
   const x = new DataFrame({ a, b, c })
   const yPred = preprocess(x)
   expect(yPred.columns).toStrictEqual(["a"])
@@ -115,12 +115,12 @@ test("clips outliers", () => {
 test("one-hot-encodes string columns with 7 or fewer unique values", () => {
   const a = random(1000)
 
-  const values = range(0, 6).map(i => makeKey(8))
-  const b = range(0, 1000).map(i => values[int(random() * values.length)])
+  const values = range(0, 6).map(() => makeKey(8))
+  const b = range(0, 1000).map(() => values[int(random() * values.length)])
 
-  const moreValues = range(0, 10).map(i => makeKey(8))
+  const moreValues = range(0, 10).map(() => makeKey(8))
   const c = range(0, 1000).map(
-    i => moreValues[int(random() * moreValues.length)]
+    () => moreValues[int(random() * moreValues.length)]
   )
 
   const x = new DataFrame({ a, b, c })
@@ -173,8 +173,8 @@ test("correctly preprocesses an ugly data set", () => {
 
   // add integers from a small set
   for (let i = 0; i < 5; i++) {
-    const values = range(0, 5).map(v => int(normal() * 100))
-    const col = range(0, n).map(v => values[int(random() * values.length)])
+    const values = range(0, 5).map(() => int(normal() * 100))
+    const col = range(0, n).map(() => values[int(random() * values.length)])
     data.push(col)
     columns.push(`intSmallSet${i}`)
   }
@@ -188,33 +188,33 @@ test("correctly preprocesses an ugly data set", () => {
 
   // add strings from a small set
   for (let i = 0; i < 5; i++) {
-    const values = range(0, 5).map(v => makeKey(8))
-    const col = range(0, n).map(v => values[int(random() * values.length)])
+    const values = range(0, 5).map(() => makeKey(8))
+    const col = range(0, n).map(() => values[int(random() * values.length)])
     data.push(col)
     columns.push(`stringSmallSet${i}`)
   }
 
   // add unique strings
   for (let i = 0; i < 5; i++) {
-    const col = range(0, n).map(v => makeKey(8))
+    const col = range(0, n).map(() => makeKey(8))
     data.push(col)
     columns.push(`string${i}`)
   }
 
   // add booleans
-  data.push(range(0, n).map(v => (random() < 0.33 ? "True" : "False")))
+  data.push(range(0, n).map(() => (random() < 0.33 ? "True" : "False")))
   columns.push(`bool0`)
 
-  data.push(range(0, n).map(v => (random() < 0.75 ? "YES" : "NO")))
+  data.push(range(0, n).map(() => (random() < 0.75 ? "YES" : "NO")))
   columns.push(`bool1`)
 
-  data.push(range(0, n).map(v => random() < 0.5))
+  data.push(range(0, n).map(() => random() < 0.5))
   columns.push(`bool2`)
 
-  data.push(range(0, n).map(v => (random() < 0.5 ? "TRUE" : "FALSE")))
+  data.push(range(0, n).map(() => (random() < 0.5 ? "TRUE" : "FALSE")))
   columns.push(`bool3`)
 
-  data.push(range(0, n).map(v => random() < 0.95))
+  data.push(range(0, n).map(() => random() < 0.95))
   columns.push(`bool4`)
 
   // add dates
@@ -222,13 +222,12 @@ test("correctly preprocesses an ugly data set", () => {
     const format = int(random() * 3)
 
     const col = range(0, n)
-      .map(v => {
+      .map(() => {
         const year = int(random() * 50 + 1970)
         const month = int(random() * 12 + 1)
         const day = int(random() * 28 + 1)
         const hour = int(random() * 24)
         const minute = int(random() * 60)
-        const leftPad = x => (x.toString().length < 2 ? "0" + x : x)
         const dateString = `${month}-${day}-${year} ${hour}:${minute}`
         return dateString
       })
@@ -279,7 +278,7 @@ test("correctly preprocesses an ugly data set", () => {
   // add some completely empty columns
   for (let i = 0; i < 5; i++) {
     const value = nullValues[int(random() * nullValues.length)]
-    const col = range(0, n).map(v => value)
+    const col = range(0, n).map(() => value)
     data.push(col)
     columns.push(`completelyEmpty${i}`)
   }
@@ -287,7 +286,7 @@ test("correctly preprocesses an ugly data set", () => {
   // add some columns with 1 unique value
   for (let i = 0; i < 5; i++) {
     const value = int(random() * 100)
-    const col = range(0, n).map(v => value)
+    const col = range(0, n).map(() => value)
     data.push(col)
     columns.push(`oneUnique${i}`)
   }

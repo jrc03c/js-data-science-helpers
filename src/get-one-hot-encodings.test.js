@@ -1,5 +1,3 @@
-const getOneHotEncodings = require("./get-one-hot-encodings.js")
-
 const {
   count,
   indexOf,
@@ -9,6 +7,8 @@ const {
   range,
   sum,
 } = require("@jrc03c/js-math-tools")
+
+const getOneHotEncodings = require("./get-one-hot-encodings.js")
 
 test("one-hot-encodes a small array", () => {
   const name = "test"
@@ -27,7 +27,7 @@ test("one-hot-encodes a large array", () => {
   const name = "test"
   const values = ["a", "b", "c", "d"]
 
-  const x = range(0, 100).map(i => {
+  const x = range(0, 100).map(() => {
     return values[int(random() * values.length)]
   })
 

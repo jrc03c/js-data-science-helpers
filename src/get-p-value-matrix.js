@@ -1,5 +1,3 @@
-const pValue = require("./p-value.js")
-
 const {
   assert,
   clamp,
@@ -10,6 +8,8 @@ const {
   shape,
   transpose,
 } = require("@jrc03c/js-math-tools")
+
+const pValue = require("./p-value.js")
 
 function getPValueMatrix(a, b) {
   if (isUndefined(b)) b = copy(a)

@@ -1,21 +1,21 @@
-const zTable = require("./z-table.json")
-
 const {
   abs,
   assert,
   dropNaNPairwise,
   isArray,
-  map,
   mean,
+  remap,
   round,
   shape,
   sqrt,
   std,
 } = require("@jrc03c/js-math-tools")
 
+const zTable = require("./z-table.json")
+
 function probability(z) {
   if (abs(z) > 4.1) return 0
-  return zTable[round(map(abs(z), 0, 4.1, 0, zTable.length))]
+  return zTable[round(remap(abs(z), 0, 4.1, 0, zTable.length))]
 }
 
 function ttest(a, b) {

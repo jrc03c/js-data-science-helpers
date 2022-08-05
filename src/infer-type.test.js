@@ -23,7 +23,7 @@ test("correctly infers a variety of data types from strings", () => {
   expect(bPred).toStrictEqual(bTrue)
 
   // dates
-  const c = range(0, 5).map(v => {
+  const c = range(0, 5).map(() => {
     const year = int(random() * 50 + 1970)
     const month = int(random() * 12 + 1)
     const day = int(random() * 28 + 1)
@@ -95,7 +95,7 @@ test("correctly infers the data type when the types are mixed", () => {
 
   expect(inferType(c).type).toBe("date")
 
-  const d = range(0, 1000).map(v => {
+  const d = range(0, 1000).map(() => {
     if (random() < 0.1) {
       return "sldkfjsldkfjsldkjfsldkfj"
     } else {

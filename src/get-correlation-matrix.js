@@ -4,7 +4,6 @@ const {
   copy,
   correl,
   dropMissingPairwise,
-  isArray,
   isUndefined,
   shape,
   transpose,
@@ -13,10 +12,13 @@ const {
 function getCorrelationMatrix(a, b) {
   if (isUndefined(b)) b = copy(a)
 
-  assert(
-    isArray(a) && isArray(b),
-    "`getCorrelationMatrix` only works on matrices!"
-  )
+  if (a.values && a.columns && a.index) {
+    a = a.values
+  }
+
+  if (b.values && b.columns && b.index) {
+    b = b.values
+  }
 
   assert(
     shape(a).length === 2 && shape(b).length === 2,

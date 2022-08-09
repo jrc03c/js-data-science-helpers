@@ -1,15 +1,38 @@
-const { assert, isArray, pow, sqrt, sum } = require("@jrc03c/js-math-tools")
+const {
+  assert,
+  isArray,
+  isDataFrame,
+  isNumber,
+  isSeries,
+  pow,
+  sqrt,
+  sum,
+} = require("@jrc03c/js-math-tools")
 const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function getMagnitude(x) {
-  assert(isArray(x), "`getMagnitude` only works on vectors!")
+  if (isSeries(x)) {
+    return getMagnitude(x.values)
+  }
 
-  assert(
-    containsOnlyNumbers(x),
-    "`getMagnitude` only works on vectors of numbers!"
-  )
+  if (isDataFrame(x)) {
+    return getMagnitude(x.values)
+  }
 
-  return sqrt(sum(pow(x, 2)))
+  if (isNumber(x)) {
+    return Math.abs(x)
+  }
+
+  if (isArray(x)) {
+    assert(
+      containsOnlyNumbers(x),
+      "Arrays passed into the `getMagnitude` function cannot contain NaN values!"
+    )
+
+    return sqrt(sum(pow(x, 2)))
+  }
+
+  return undefined
 }
 
 module.exports = getMagnitude

@@ -1,6 +1,20 @@
-const { assert, isArray, shape, zeros } = require("@jrc03c/js-math-tools")
+const {
+  assert,
+  DataFrame,
+  isArray,
+  isSeries,
+  shape,
+  zeros,
+} = require("@jrc03c/js-math-tools")
 
 function diagonalize(x) {
+  if (isSeries(x)) {
+    const out = new DataFrame(diagonalize(x.values))
+    out.index = x.index.slice()
+    out.columns = x.index.slice()
+    return out
+  }
+
   assert(isArray(x), "The `diagonalize` function only works on vectors!")
 
   const xShape = shape(x)

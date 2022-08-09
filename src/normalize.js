@@ -2,13 +2,12 @@ const {
   assert,
   dropNaN,
   isArray,
+  isJagged,
   mean,
   shape,
   std,
   transpose,
 } = require("@jrc03c/js-math-tools")
-
-const isJagged = require("./is-jagged.js")
 
 const errorMessage =
   "The `normalize` function only works on vectors, matrices, Series, or DataFrames!"

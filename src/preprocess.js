@@ -96,7 +96,7 @@ function preprocess(df) {
         continue
       }
     } else if (type === "number") {
-      const clippedValues = clipOutliers(values).values
+      const clippedValues = clipOutliers(values)
       x[index] = clippedValues
       let wasHighlyCorrelated = false
 

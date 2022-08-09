@@ -6,7 +6,10 @@ const {
   copy,
   dropNaN,
   isArray,
+  isDataFrame,
+  isNested,
   isNumber,
+  isSeries,
   max,
   median,
   min,
@@ -21,15 +24,30 @@ const divide = (a, b) => scale(a, pow(b, -1))
 const subtract = (a, b) => add(a, scale(b, -1))
 
 function clipOutliers(x, maxScore) {
+  if (isSeries(x)) {
+    const out = x.copy()
+    out.values = clipOutliers(out.values, maxScore)
+    return out
+  }
+
+  if (isDataFrame(x)) {
+    return x.copy().apply(col => clipOutliers(col.values, maxScore))
+  }
+
   maxScore = maxScore || 5
 
   assert(isNumber(maxScore), "`maxScore` must be a number!")
   assert(isArray(x), "`x` must be a one-dimensional array!")
+
+  if (isNested(x)) {
+    return x.map(row => clipOutliers(row, maxScore))
+  }
+
   assert(shape(x).length === 1, "`x` must be a one-dimensional array!")
 
   const numericalValues = dropNaN(x)
-  if (isBinary(numericalValues)) return { values: x, wasClipped: false }
-  if (numericalValues.length === 0) return { values: x, wasClipped: false }
+  if (isBinary(numericalValues)) return x
+  if (numericalValues.length === 0) return x
 
   const xMedian = median(numericalValues)
   let xMad = median(abs(subtract(numericalValues, xMedian)))
@@ -48,7 +66,7 @@ function clipOutliers(x, maxScore) {
     xMad = (after - before) / 2
 
     if (xMad === 0) {
-      return { values: x, wasClipped: false }
+      return x
     }
 
     outlierIsImmediatelyAboveOrBelowMedian =
@@ -67,9 +85,9 @@ function clipOutliers(x, maxScore) {
       }
     })
 
-    return { values: out, wasClipped: true }
+    return out
   } else {
-    return { values: x, wasClipped: false }
+    return x
   }
 }
 

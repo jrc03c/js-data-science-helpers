@@ -1,5 +1,6 @@
 const {
   assert,
+  isDataFrame,
   isEqual,
   set,
   sort,
@@ -10,12 +11,12 @@ const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function getHighlyCorrelatedColumns(correlations) {
   assert(
-    correlations.values && correlations.index && correlations.columns,
+    isDataFrame(correlations),
     "You must pass a correlation matrix DataFrame into the `getHighlyCorrelatedColumns` function!"
   )
 
   assert(
-    containsOnlyNumbers(correlations.values),
+    containsOnlyNumbers(correlations),
     "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must contain only numbers!"
   )
 
@@ -26,7 +27,7 @@ function getHighlyCorrelatedColumns(correlations) {
 
   assert(
     isEqual(correlations.columns, correlations.index),
-    "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must be symmetrical!"
+    "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must be symmetrical! (Specifically, the row and column names didn't match in this case!)"
   )
 
   const out = {}

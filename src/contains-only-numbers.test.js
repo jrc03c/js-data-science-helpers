@@ -1,78 +1,44 @@
-const { normal } = require("@jrc03c/js-math-tools")
+const { DataFrame, normal, random, Series } = require("@jrc03c/js-math-tools")
 const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 test("checks if various arrays contain only numbers", () => {
-  const a = [1, 2, 3, 4, 5]
-  expect(containsOnlyNumbers(a)).toBe(true)
+  const rights = [
+    234,
+    [2, 3, 4],
+    normal(100),
+    normal([2, 3, 4, 5]),
+    new Series(normal(100)),
+    new DataFrame(normal([100, 25])),
+  ]
 
-  const b = [1, 2, 3, 4, 0]
-  expect(containsOnlyNumbers(b)).toBe(true)
+  rights.forEach(x => {
+    expect(containsOnlyNumbers(x)).toBe(true)
+  })
 
-  const c = [1, "two", 3, 4, 5]
-  expect(containsOnlyNumbers(c)).toBe(false)
+  const wrongs = [
+    [],
+    "foo",
+    [2, "three", 4],
 
-  const d = normal([5, 5, 5])
-  expect(containsOnlyNumbers(d)).toBe(true)
+    normal(100).map(v => {
+      return random() < 0.5 ? null : v
+    }),
 
-  d[1][2][3] = null
-  expect(containsOnlyNumbers(d)).toBe(false)
+    normal([100, 5]).map(row => {
+      return row.map(v => {
+        return random() < 0.5 ? true : v
+      })
+    }),
 
-  d[1][2][3] = undefined
-  expect(containsOnlyNumbers(d)).toBe(false)
+    new Series([2, 3, 4, () => {}, {}]),
 
-  d[1][2][3] = true
-  expect(containsOnlyNumbers(d)).toBe(false)
+    new DataFrame([
+      [true, false],
+      [null, undefined],
+    ]),
+  ]
 
-  d[1][2][3] = false
-  expect(containsOnlyNumbers(d)).toBe(false)
-
-  d[1][2][3] = Infinity
-  expect(containsOnlyNumbers(d)).toBe(true)
-
-  d[1][2][3] = Math.PI
-  expect(containsOnlyNumbers(d)).toBe(true)
-
-  d[1][2][3] = () => {}
-  expect(containsOnlyNumbers(d)).toBe(false)
-
-  d[1][2][3] = {}
-  expect(containsOnlyNumbers(d)).toBe(false)
-})
-
-test("throws an error when attempting to call `containsOnlyNumbers` with non-arrays", () => {
-  expect(() => {
-    containsOnlyNumbers()
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers(123)
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers("foo")
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers(true)
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers(false)
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers(() => {})
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers({})
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers(undefined)
-  }).toThrow()
-
-  expect(() => {
-    containsOnlyNumbers(null)
-  }).toThrow()
+  wrongs.forEach(x => {
+    expect(containsOnlyNumbers(x)).toBe(false)
+  })
 })

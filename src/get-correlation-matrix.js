@@ -3,7 +3,9 @@ const {
   clamp,
   copy,
   correl,
+  DataFrame,
   dropMissingPairwise,
+  isDataFrame,
   isUndefined,
   shape,
   transpose,
@@ -11,14 +13,6 @@ const {
 
 function getCorrelationMatrix(a, b) {
   if (isUndefined(b)) b = copy(a)
-
-  if (a.values && a.columns && a.index) {
-    a = a.values
-  }
-
-  if (b.values && b.columns && b.index) {
-    b = b.values
-  }
 
   assert(
     shape(a).length === 2 && shape(b).length === 2,
@@ -29,6 +23,21 @@ function getCorrelationMatrix(a, b) {
     shape(a)[0] === shape(b)[0],
     "Matrix `a` and `b` must have the number of rows!"
   )
+
+  if (isDataFrame(a)) {
+    if (isDataFrame(b)) {
+      const out = new DataFrame(getCorrelationMatrix(a.values, b.values))
+      out.index = a.columns.slice()
+      out.columns = b.columns.slice()
+      return out
+    } else {
+      return getCorrelationMatrix(a, new DataFrame(b))
+    }
+  }
+
+  if (isDataFrame(b)) {
+    return getCorrelationMatrix(new DataFrame(a), b)
+  }
 
   // note: this produces a "missing-aware" correlation matrix!
   const out = []

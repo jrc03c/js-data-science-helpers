@@ -248,3 +248,9 @@ Sorts a correlation matrix so that variables near each other in the visualizatio
 ## `standardize(x)`
 
 Identical to the `normalize` function.
+
+# To do
+
+- Make sure that all relevant functions accept and return `Series` and `DataFrame` instances.
+- Match test style from `js-math-tools`.
+- Match error / null / NaN / undefined style from `js-math-tools`.

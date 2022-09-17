@@ -8,6 +8,7 @@ const {
   isDataFrame,
   isEqual,
   isJagged,
+  isNumber,
   set,
   shape,
   transpose,
@@ -17,7 +18,13 @@ const clipOutliers = require("./clip-outliers.js")
 const getOneHotEncodings = require("./get-one-hot-encodings.js")
 const inferType = require("./infer-type.js")
 
-function preprocess(df) {
+function preprocess(df, maxUniqueStrings, correlationThreshold) {
+  maxUniqueStrings = isNumber(maxUniqueStrings) ? maxUniqueStrings : 7
+
+  correlationThreshold = isNumber(correlationThreshold)
+    ? correlationThreshold
+    : 1 - 1e-5
+
   if (isArray(df)) {
     assert(
       shape(df).length === 2 && !isJagged(df),
@@ -94,8 +101,8 @@ function preprocess(df) {
     const type = types[colName]
 
     if (type === "string") {
-      // if there are fewer than 7 unique values, then one-hot-encode them
-      if (nonMissingValuesSet.length <= 7) {
+      // if there are up to 7 unique values, then one-hot-encode them
+      if (nonMissingValuesSet.length <= maxUniqueStrings) {
         const encodings = getOneHotEncodings(colName, values)
 
         Object.keys(encodings).forEach(key => {
@@ -117,7 +124,7 @@ function preprocess(df) {
         const otherValues = x[i]
         const r = correl(values, otherValues)
 
-        if (r > 0.99) {
+        if (r > correlationThreshold) {
           columns.splice(index, 1)
           x.splice(index, 1)
           wasHighlyCorrelated = true

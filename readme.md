@@ -231,7 +231,7 @@ ttest_ind(a, b, equal_var=False, nan_policy="omit")
 
 I'm not sure why there's a very slight variation in returned _p_-values between my version of the function and scipy's. It's possible that there's some subtle degrees-of-freedom difference in our implementations; or maybe they have a better way of computing the probability of _t_ (because mine uses a table of values and theirs may use a continuous function or whatever). However, after lots of testing, I feel pretty confident that these small differences are probably not significant. Let me know if you disagree, though. 😊
 
-### `preprocess(df)`
+### `preprocess(df, maxUniqueStrings=7, correlationThreshold=(1 - 1e-5))`
 
 Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that contains only numbers and `null` values. The cleaning process involves:
 
@@ -239,8 +239,8 @@ Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that c
 - dropping all but 1 of any duplicate columns
 - dropping any columns with fewer than 15 non-missing values
 - dropping any columns with only 1 unique value
-- one-hot-encoding any string columns where there are 7 or fewer unique values
-- dropping all but 1 of any highly correlated columns (i.e., _r_ > `threshold` from the `getHighlyCorrelatedColumns` function)
+- one-hot-encoding any string columns where there are no more than `maxUniqueStrings` unique values
+- dropping all but 1 of any highly correlated columns (i.e., _r_ > `correlationThreshold`)
 - dropping all other columns that do not contain strings or numbers
 
 ### `project(v, u)`

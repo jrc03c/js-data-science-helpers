@@ -71,7 +71,7 @@ diagonalize([1, 2, 3])
 
 Returns a correlation matrix containing the correlations of every column in `a` against every column in `b`. If `b === null`, then `a` is just compared against itself.
 
-## `getHighlyCorrelatedColumns(a, b=null, threshold=(1 - 1e-5))` or `getHighlyCorrelatedColumns(c, threshold=(1 - 1e-5))`
+## `getHighlyCorrelatedColumns(a, b=null, threshold=(1 - 1e-5))` <br> `getHighlyCorrelatedColumns(c, threshold=(1 - 1e-5))`
 
 Returns a dictionary of columns and their highly correlated counterparts given (1) `a` and `b`, two matrices or `DataFrame` instances for which a correlation matrix has not yet been computed, or (2) a correlation matrix `c`. An optional `threshold` can be specified, which defines the correlation (_r_) value above which columns are considered to be highly correlated.
 
@@ -90,7 +90,7 @@ Note that literally identical columns will be included among the results. So, fo
 
 Returns the Euclidean length (i.e., the 2-norm) of `x`.
 
-## `getOneHotEncodings(name, values)` or `getOneHotEncodings(series)`
+## `getOneHotEncodings(name, values)` <br> `getOneHotEncodings(series)`
 
 Given a vector containing _n_ unique values, returns an dictionary with _n_-1 key-value pairs where each key is `name` + a unique value and each value is a vector of binary values indicating whether or not `x` matches that particular unique value. For example:
 

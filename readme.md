@@ -261,7 +261,7 @@ Identical to the `normalize` function.
 
 # Notes
 
-## Handling NaN values
+### Handling NaN values
 
 Many of the calculations in this library can't be done correctly if the given dataset includes NaN values. By default, the library automatically drops NaN values in every relevant calculation, no errors are thrown, and no warnings are given.
 

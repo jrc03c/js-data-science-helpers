@@ -40,19 +40,19 @@ require("@jrc03c/js-data-science-helpers").dump()
 
 # API
 
-## `clipOutliers(x, maxScore=5)`
+### `clipOutliers(x, maxScore=5)`
 
 Clips all values in a `x` to the range [`median(x) - maxScore * MAD(x)`, `median(x) + maxScore * MAD(x)`]. (See: [MAD](https://en.wikipedia.org/wiki/Median_absolute_deviation))
 
-## `cohensd(a, b)`
+### `cohensd(a, b)`
 
 Returns the Cohen's _D_ value for two vectors or `Series` instances `a` vs. `b`.
 
-## `containsOnlyNumbers(x)`
+### `containsOnlyNumbers(x)`
 
 Returns a boolean indicating whether or not `x` contains only numbers.
 
-## `diagonalize(x)`
+### `diagonalize(x)`
 
 Turns 1-dimensional array or `Series` `x` into a square matrix with the values of `x` along the main diagonal (top left to bottom right) and zeros everywhere else. For example:
 
@@ -67,11 +67,11 @@ diagonalize([1, 2, 3])
 // ]
 ```
 
-## `getCorrelationMatrix(a, b=null)`
+### `getCorrelationMatrix(a, b=null)`
 
 Returns a correlation matrix containing the correlations of every column in `a` against every column in `b`. If `b === null`, then `a` is just compared against itself.
 
-## `getHighlyCorrelatedColumns(a, b=null, threshold=(1 - 1e-5))` <br> `getHighlyCorrelatedColumns(c, threshold=(1 - 1e-5))`
+### `getHighlyCorrelatedColumns(a, b=null, threshold=(1 - 1e-5))` <br> `getHighlyCorrelatedColumns(c, threshold=(1 - 1e-5))`
 
 Returns a dictionary of columns and their highly correlated counterparts given (1) `a` and `b`, two matrices or `DataFrame` instances for which a correlation matrix has not yet been computed, or (2) a correlation matrix `c`. An optional `threshold` can be specified, which defines the correlation (_r_) value above which columns are considered to be highly correlated.
 
@@ -86,11 +86,11 @@ The return value might look something like this:
 
 Note that literally identical columns will be included among the results. So, for example, if you only pass an `a` value into the function, then every column will _at least_ be identical to itself (meaning that there will be at least one column name in every array in the object), though it might also be highly correlated with other columns.
 
-## `getMagnitude(x)`
+### `getMagnitude(x)`
 
 Returns the Euclidean length (i.e., the 2-norm) of `x`.
 
-## `getOneHotEncodings(name, values)` <br> `getOneHotEncodings(series)`
+### `getOneHotEncodings(name, values)` <br> `getOneHotEncodings(series)`
 
 Given a vector containing _n_ unique values, returns an dictionary with _n_-1 key-value pairs where each key is `name` + a unique value and each value is a vector of binary values indicating whether or not `x` matches that particular unique value. For example:
 
@@ -102,11 +102,11 @@ console.log(encodings)
 // { foo_3: [ 0, 0, 1, 0, 0, 0 ], foo_4: [ 0, 0, 0, 1, 0, 1 ] }
 ```
 
-## `getPValueMatrix(x)`
+### `getPValueMatrix(x)`
 
 Returns a matrix containing the _p_-values of every column in `a` against every column in `b`. If `b === null`, then `a` is just compared against itself.
 
-## `getPercentages(x)`
+### `getPercentages(x)`
 
 Returns an array in which each value is an object representing a unique value in `x` with the properties `item`, `count`, and `percentages`. For example:
 
@@ -123,7 +123,7 @@ console.log(percentages)
 // ]
 ```
 
-## `IndexMatcher(mode=IndexMatcher.DROP_MISSING_MODE)`
+### `IndexMatcher(mode=IndexMatcher.DROP_MISSING_MODE)`
 
 The `IndexMatcher` class makes it relatively easy to make sure that two `Series` or `DataFrame` instances have the same index. The constructor takes a single argument, the `mode`, which is one of:
 
@@ -132,11 +132,11 @@ The `IndexMatcher` class makes it relatively easy to make sure that two `Series`
 
 In the first mode, rows are dropped only if they contain null, undefined, or NaN values. In the second mode, rows are dropped if they contain any non-numerical values.
 
-### `IndexMatcher.fit(a, b, c, ...)`
+##### `IndexMatcher.fit(a, b, c, ...)`
 
 Records the index which is common to all of the given datasets.
 
-### `IndexMatcher.transform(a, b, c, ...)`
+##### `IndexMatcher.transform(a, b, c, ...)`
 
 Transforms the given datasets to have the index that was recorded by the `fit` function. Note that a single array containing all of the transformed datasets is returned. So, a common syntax might be something like:
 
@@ -149,7 +149,7 @@ const matcher = new IndexMatcher()
 const [d, e, f] = matcher.fit(a, b, c).transform(a, b, c)
 ```
 
-### `IndexMatcher.fitAndTransform(a, b, c, ...)`
+##### `IndexMatcher.fitAndTransform(a, b, c, ...)`
 
 Performs the fitting and transforming in a single step. So, similar to the example above:
 
@@ -161,7 +161,7 @@ const c = new DataFrame(...)
 const [d, e, f] = new IndexMatcher().fitAndTransform(a, b, c)
 ```
 
-## `inferType(x)`
+### `inferType(x)`
 
 Given a vector `x`, returns an object with these properties:
 
@@ -205,23 +205,23 @@ Booleans:
 
 This function doesn't cover every possible edge case, of course; it should probably only be expected to work on an average dataset. If your data is especially unusual, please consider manually inferring types some other way.
 
-## `isBinary(x)`
+### `isBinary(x)`
 
 Returns a boolean indicating whether or not `x` contains only binary data (0s and 1s).
 
-## `isJagged(x)`
+### `isJagged(x)`
 
 Returns a boolean indicating whether or not the array `x` is jagged / ragged (i.e., whether or not it has nested arrays of inconsistent length).
 
-## `normalize(x)`
+### `normalize(x)`
 
 Identical to the `standardize` function. Returns a transformed copy of `x` in which the values have been converted to _z_-scores. In other words: `(x - mean(x)) / stdev(x)`
 
-## `orthonormalize(x)`
+### `orthonormalize(x)`
 
 Returns a transformed copy of a matrix or `DataFrame` `x` in which all of the columns have been made orthogonal to each other. (See: [Gram-Schmidt process](https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process)) This is particularly useful for generating random datasets with uncorrelated features.
 
-## `pValue(a, b)`
+### `pValue(a, b)`
 
 Returns the _p_-value of two vectors using Welch's _t_-test. (See: [Welch's _t_-test](https://en.wikipedia.org/wiki/Welch's_t-test)) Note that this function returns results that are very, very close to [scipy's `ttest_ind` function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html) when the latter is invoked this way:
 
@@ -231,7 +231,7 @@ ttest_ind(a, b, equal_var=False, nan_policy="omit")
 
 I'm not sure why there's a very slight variation in returned _p_-values between my version of the function and scipy's. It's possible that there's some subtle degrees-of-freedom difference in our implementations; or maybe they have a better way of computing the probability of _t_ (because mine uses a table of values and theirs may use a continuous function or whatever). However, after lots of testing, I feel pretty confident that these small differences are probably not significant. Let me know if you disagree, though. 😊
 
-## `preprocess(df)`
+### `preprocess(df)`
 
 Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that contains only numbers and `null` values. The cleaning process involves:
 
@@ -243,19 +243,19 @@ Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that c
 - dropping all but 1 of any highly correlated columns (i.e., _r_ > `threshold` from the `getHighlyCorrelatedColumns` function)
 - dropping all other columns that do not contain strings or numbers
 
-## `project(v, u)`
+### `project(v, u)`
 
 Returns the projection of vector or `Series` `v` onto vector or `Series` `u`.
 
-## `rScore(xTrue, xPred)`
+### `rScore(xTrue, xPred)`
 
 Returns (roughly) the square root of the <i>R</i><sup>2</sup> value of `xTrue` versus `xPred`. Since <i>R</i><sup>2</sup> can be negative, the actual value returned is `sign(R^2) * sqrt(abs(R^2))`. The two datasets can be any shape provided that they have the same shape as each other.
 
-## `sortCorrelationMatrix(c)`
+### `sortCorrelationMatrix(c)`
 
 Sorts a correlation matrix (array or `DataFrame`) so that variables near each other in the visualization are also highly correlated with one another. The first variable chosen is the one with the highest sum of squared correlations. The second variable chosen is the remaining variable most highly correlated with the first; the third variable chosen is the remaining variable most highly correlated with the second; and so on. This algorithm is called the Hunter chain method. (See: ["Methods of Reordering the Correlation Matrix to Vacilitate Visual Inspection and Preliminary Cluster Analysis" by John Edward Hunter](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1745-3984.1973.tb00782.x))
 
-## `standardize(x)`
+### `standardize(x)`
 
 Identical to the `normalize` function.
 

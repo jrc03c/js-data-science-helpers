@@ -1,77 +1,62 @@
-const getMagnitude = require("./get-magnitude.js")
-const project = require("./project.js")
-
-const divide = (a, b) => scale(a, pow(b, -1))
-const normalize = x => divide(x, getMagnitude(x))
-const similarity = (a, b) => dot(a, b) / (getMagnitude(a) * getMagnitude(b))
-
 const {
-  abs,
-  distance,
+  DataFrame,
   dot,
+  isEqual,
   normal,
-  pow,
-  random,
   scale,
+  Series,
 } = require("@jrc03c/js-math-tools")
 
-test("projects a small vector onto another", () => {
-  const a = [3, 4]
-  const b = [10, 0]
-  const yTrue = [3, 0]
-  const yPred = project(a, b)
-  expect(yPred).toStrictEqual(yTrue)
-})
+const project = require("./project.js")
 
-test("projects a large vector onto another", () => {
-  const a = normal(1000)
-  const b = random(1000)
-  const yPred = project(a, b)
-  const s = similarity(yPred, b)
+test("tests that vectors can be correctly projected onto other vectors", () => {
+  const a = [4, 3]
+  const b = [1, 0]
+  const cTrue = [4, 0]
+  const cPred = project(a, b)
+  expect(isEqual(cPred, cTrue)).toBe(true)
 
-  if (s < 0) {
-    expect(abs(s + 1)).toBeLessThan(1e-5)
-  } else {
-    expect(abs(s - 1)).toBeLessThan(1e-5)
-  }
+  const d = normal(100)
+  const e = normal(100)
+  const fTrue = scale(dot(d, e) / dot(e, e), e)
+  const fPred = project(d, e)
+  expect(isEqual(fPred, fTrue)).toBe(true)
 
-  expect(distance(abs(normalize(yPred)), abs(normalize(b)))).toBeLessThan(1e-5)
-})
+  const g = new Series({ hello: normal(100) })
+  const h = new Series({ goodbye: normal(100) })
+  const iTrue = new Series(project(g.values, h.values))
+  const iPred = project(g, h)
+  expect(isEqual(iPred, iTrue)).toBe(true)
 
-test("throws an error when attempting to project non-vectors onto non-vectors", () => {
-  expect(() => {
-    project()
-  }).toThrow()
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    [
+      [2, 3, 4],
+      [5, 6, 7],
+    ],
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+    new DataFrame({ foo: [1, 2, 4, 8, 16], bar: [1, 3, 9, 27, 81] }),
+  ]
 
-  expect(() => {
-    project([], [])
-  }).toThrow()
-
-  expect(() => {
-    project([1, 2, "three"], ["four", 5, 6])
-  }).toThrow()
-
-  expect(() => {
-    project(normal([5, 5, 5]), normal([5, 5, 5]))
-  }).toThrow()
-
-  expect(() => {
-    project(123, 456)
-  }).toThrow()
-
-  expect(() => {
-    project("foo", "bar")
-  }).toThrow()
-
-  expect(() => {
-    project(true, false)
-  }).toThrow()
-
-  expect(() => {
-    project(undefined, null)
-  }).toThrow()
-
-  expect(() => {
-    project(() => {}, {})
-  }).toThrow()
+  wrongs.forEach(a => {
+    wrongs.forEach(b => {
+      expect(() => project(a, b)).toThrow()
+    })
+  })
 })

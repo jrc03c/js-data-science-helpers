@@ -1,5 +1,5 @@
 const {
-  assert,
+  dropNaN,
   isArray,
   isDataFrame,
   isNumber,
@@ -8,14 +8,11 @@ const {
   sqrt,
   sum,
 } = require("@jrc03c/js-math-tools")
-const containsOnlyNumbers = require("./contains-only-numbers.js")
+
+const common = require("./common.js")
 
 function getMagnitude(x) {
-  if (isSeries(x)) {
-    return getMagnitude(x.values)
-  }
-
-  if (isDataFrame(x)) {
+  if (isDataFrame(x) || isSeries(x)) {
     return getMagnitude(x.values)
   }
 
@@ -24,15 +21,14 @@ function getMagnitude(x) {
   }
 
   if (isArray(x)) {
-    assert(
-      containsOnlyNumbers(x),
-      "Arrays passed into the `getMagnitude` function cannot contain NaN values!"
-    )
+    if (common.shouldIgnoreNaNValues) {
+      x = dropNaN(x)
+    }
 
     return sqrt(sum(pow(x, 2)))
   }
 
-  return undefined
+  return NaN
 }
 
 module.exports = getMagnitude

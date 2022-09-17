@@ -1,51 +1,50 @@
-const { add, normal, scale } = require("@jrc03c/js-math-tools")
+const { DataFrame, normal, Series } = require("@jrc03c/js-math-tools")
 const pValue = require("./p-value.js")
 
-test("gets a p-value for pairs of vectors", () => {
-  const a = normal(1000)
+test("tests that p-values can be correctly computed", () => {
+  const a = normal(100)
   expect(pValue(a, a)).toBe(1)
 
-  const b = add(a, scale(0.01, normal(1000)))
-  expect(pValue(a, b)).toBeGreaterThan(0.95)
+  const b = normal(100)
+  const c = normal(100).map(v => v + 100)
+  expect(pValue(b, c)).toBeLessThan(0.01)
 
-  const c = add(a, 1000)
-  expect(pValue(a, c)).toBeLessThan(0.05)
-})
+  const d = normal([2, 3, 4, 5])
+  const e = normal([2, 3, 4, 5])
+  expect(() => pValue(d, e)).not.toThrow()
 
-test("throw an error when attempting to get a p-value using non-vectors", () => {
-  expect(() => {
-    pValue()
-  }).toThrow()
+  const f = new Series({ hello: normal(100) })
+  const g = new Series({ goodbye: normal(100) })
+  expect(() => pValue(f, g)).not.toThrow()
 
-  expect(() => {
-    pValue([], [])
-  }).toThrow()
+  const h = new DataFrame({ foo: normal(100), bar: normal(100) })
+  const i = new DataFrame({ baz: normal(100), aha: normal(100) })
+  expect(() => pValue(h, i)).not.toThrow()
 
-  expect(() => {
-    pValue(normal([5, 5]), normal([5, 5]))
-  }).toThrow()
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+  ]
 
-  expect(() => {
-    pValue([1, 2, "three"], ["four", 5, 6])
-  }).not.toThrow()
-
-  expect(() => {
-    pValue(123, 456)
-  }).toThrow()
-
-  expect(() => {
-    pValue("foo", "bar")
-  }).toThrow()
-
-  expect(() => {
-    pValue(true, false)
-  }).toThrow()
-
-  expect(() => {
-    pValue(null, undefined)
-  }).toThrow()
-
-  expect(() => {
-    pValue(() => {}, {})
-  }).toThrow()
+  wrongs.forEach(a => {
+    wrongs.forEach(b => {
+      expect(() => pValue(a, b)).toThrow()
+    })
+  })
 })

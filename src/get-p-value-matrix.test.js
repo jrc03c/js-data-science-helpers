@@ -1,82 +1,84 @@
-const getPValueMatrix = require("./get-p-value-matrix.js")
-
 const {
-  add,
-  chop,
-  distance,
-  identity,
+  DataFrame,
+  isEqual,
+  isNumber,
   normal,
-  ones,
-  round,
-  shape,
+  range,
+  Series,
+  set,
   transpose,
 } = require("@jrc03c/js-math-tools")
 
+const common = require("./common.js")
+const getPValueMatrix = require("./get-p-value-matrix.js")
+
 test("gets a p-value matrix from a matrix containing identical columns", () => {
-  const row = normal(100)
-  const x = transpose([row, row, row])
-  const yTrue = ones([3, 3])
-  const yPred = getPValueMatrix(x)
-  expect(distance(yPred, yTrue)).toBeLessThan(1e-5)
-})
+  const a = normal(100)
+  const b = transpose(range(0, 5).map(() => a))
+  const c = getPValueMatrix(b)
+  const cSet = set(c)
+  expect(cSet.length).toBe(1)
+  expect(cSet[0]).toBe(1)
 
-test("gets a p-value matrix from a matrix with completely different columns", () => {
-  const x = transpose([
-    add(-1000, normal(1000)),
-    normal(1000),
-    add(1000, normal(1000)),
-  ])
+  const d = transpose([normal(100), normal(100).map(v => v + 100)])
 
-  const yTrue = identity(3)
-  const yPred = chop(round(getPValueMatrix(x)))
-  expect(distance(yPred, yTrue)).toBeLessThan(1e-5)
-})
+  const eTrue = [
+    [1, 0],
+    [0, 1],
+  ]
+  const ePred = getPValueMatrix(d)
+  expect(isEqual(ePred, eTrue)).toBe(true)
 
-test("gets a p-value matrix from two matrices", () => {
-  const a = normal([100, 5])
-  const b = normal([100, 10])
-  const yPred = getPValueMatrix(a, b)
-  expect(shape(yPred)).toStrictEqual([5, 10])
-})
+  const f = new DataFrame(normal([100, 5]))
+  const g = new DataFrame(normal([100, 7]))
 
-test("throws an error when attempting to get p-value matrices from non-matrices", () => {
-  expect(() => {
-    getPValueMatrix()
-  }).toThrow()
+  expect(
+    isEqual(getPValueMatrix(f, g).values, getPValueMatrix(f.values, g.values))
+  ).toBe(true)
 
-  expect(() => {
-    getPValueMatrix(normal([5, 5, 5, 5]))
-  }).toThrow()
+  common.shouldIgnoreNaNValues = false
+  const h = normal([10, 10])
+  h.forEach((row, i) => (row[i] = "uh-oh"))
+  const gPred1 = getPValueMatrix(h)
+  expect(set(gPred1).length).toBe(1)
+  expect(set(gPred1)[0]).toBeNaN()
 
-  expect(() => {
-    getPValueMatrix(123)
-  }).toThrow()
+  common.shouldIgnoreNaNValues = true
+  const gPred2 = getPValueMatrix(h)
+  expect(set(gPred2).length).toBeGreaterThan(1)
 
-  expect(() => {
-    getPValueMatrix("foo")
-  }).toThrow()
+  gPred2.forEach(row => {
+    row.forEach(v => {
+      expect(isNumber(v)).toBe(true)
+    })
+  })
 
-  expect(() => {
-    getPValueMatrix(true)
-  }).toThrow()
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    [2, 3, 4],
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+    new Series({ hello: [10, 20, 30, 40, 50] }),
+  ]
 
-  expect(() => {
-    getPValueMatrix(false)
-  }).toThrow()
-
-  expect(() => {
-    getPValueMatrix(null)
-  }).toThrow()
-
-  expect(() => {
-    getPValueMatrix(undefined)
-  }).toThrow()
-
-  expect(() => {
-    getPValueMatrix(() => {})
-  }).toThrow()
-
-  expect(() => {
-    getPValueMatrix({})
-  }).toThrow()
+  wrongs.forEach(a => {
+    wrongs.forEach(b => {
+      expect(() => getPValueMatrix(a, b)).toThrow()
+    })
+  })
 })

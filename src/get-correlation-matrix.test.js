@@ -1,105 +1,92 @@
 const {
-  chop,
   DataFrame,
   distance,
   identity,
-  isDataFrame,
+  isEqual,
   normal,
   ones,
-  round,
+  Series,
+  set,
   shape,
-  transpose,
 } = require("@jrc03c/js-math-tools")
 
+const common = require("./common.js")
 const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const gramSchmidtOrthonormalize = require("./gram-schmidt-orthonormalize.js")
+const orthonormalize = require("./orthonormalize.js")
 
-test("gets a correlation matrix from a matrix containing identical columns", () => {
-  const row = normal(100)
-  const x = transpose([row, row, row])
-  const yTrue = ones([3, 3])
-  const yPred = getCorrelationMatrix(x)
-  expect(distance(yPred, yTrue)).toBeLessThan(1e-5)
-})
+test("tests that correlation matrices can be correctly computed", () => {
+  const a = [
+    [2, 3],
+    [4, 5],
+    [6, 7],
+  ]
 
-test("gets a correlation matrix from an orthonormalized matrix", () => {
-  const x = gramSchmidtOrthonormalize(normal([1000, 5]))
-  const yTrue = identity(5)
-  const yPred = chop(round(getCorrelationMatrix(x)))
-  expect(distance(yPred, yTrue)).toBeLessThan(1e-5)
-})
+  expect(distance(getCorrelationMatrix(a), ones([2, 2]))).toBeLessThan(0.01)
 
-test("gets a correlation matrix from two matrices", () => {
-  const a = normal([100, 5])
-  const b = normal([100, 10])
-  const yPred = getCorrelationMatrix(a, b)
-  expect(shape(yPred)).toStrictEqual([5, 10])
-})
+  const b = normal([1000, 5])
+  const bTrue = identity(5)
+  const bPred = getCorrelationMatrix(orthonormalize(b))
+  expect(distance(bPred, bTrue)).toBeLessThan(0.01)
 
-test("gets correlation matrices using DataFrames", () => {
-  const a = new DataFrame(normal([25, 8]))
-  a.columns = a.columns.map((v, i) => "a" + i)
+  expect(
+    isEqual(
+      shape(getCorrelationMatrix(normal([10, 5]), normal([10, 7]))),
+      [5, 7]
+    )
+  ).toBe(true)
 
-  const b = new DataFrame(normal([25, 10]))
-  b.columns = b.columns.map((v, i) => "b" + i)
+  const c = new DataFrame(normal([100, 5]))
+  const d = new DataFrame(normal([100, 7]))
 
-  const c = getCorrelationMatrix(a, b)
-  expect(isDataFrame(c)).toBe(true)
-  expect(shape(c)).toStrictEqual([8, 10])
-  expect(c.index).toStrictEqual(a.columns)
-  expect(c.columns).toStrictEqual(b.columns)
+  expect(
+    isEqual(
+      getCorrelationMatrix(c, d).values,
+      getCorrelationMatrix(c.values, d.values)
+    )
+  ).toBe(true)
 
-  const d = normal([25, 4])
-  const e = getCorrelationMatrix(a, d)
-  const f = getCorrelationMatrix(d, b)
-  expect(isDataFrame(e)).toBe(true)
-  expect(shape(e)).toStrictEqual([8, 4])
-  expect(e.index).toStrictEqual(a.columns)
-  expect(e.columns).toStrictEqual(e.columns.map((v, i) => "col" + i))
-  expect(isDataFrame(f)).toBe(true)
-  expect(shape(f)).toStrictEqual([4, 10])
-  expect(f.index).toStrictEqual(f.index.map((v, i) => "col" + i))
-  expect(f.columns).toStrictEqual(b.columns)
-})
+  const e = normal([10, 10])
+  e.forEach((row, i) => (row[i] = "foo"))
 
-test("throws an error when attempting to get correlation matrices from non-matrices", () => {
-  expect(() => {
-    getCorrelationMatrix()
-  }).toThrow()
+  common.shouldIgnoreNaNValues = false
+  const fPred1 = set(getCorrelationMatrix(e))
+  expect(fPred1.length).toBe(1)
+  expect(fPred1[0]).toBeNaN()
 
-  expect(() => {
-    getCorrelationMatrix(normal([5, 5, 5, 5]))
-  }).toThrow()
+  common.shouldIgnoreNaNValues = true
+  const fPred2 = set(getCorrelationMatrix(e))
+  expect(fPred2.length).toBeGreaterThan(1)
 
-  expect(() => {
-    getCorrelationMatrix(123)
-  }).toThrow()
+  fPred2.forEach(v => {
+    expect(v).not.toBeNaN()
+  })
 
-  expect(() => {
-    getCorrelationMatrix("foo")
-  }).toThrow()
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    [2, 3, 4],
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+    new Series({ hello: [10, 20, 30, 40, 50] }),
+  ]
 
-  expect(() => {
-    getCorrelationMatrix(true)
-  }).toThrow()
-
-  expect(() => {
-    getCorrelationMatrix(false)
-  }).toThrow()
-
-  expect(() => {
-    getCorrelationMatrix(null)
-  }).toThrow()
-
-  expect(() => {
-    getCorrelationMatrix(undefined)
-  }).toThrow()
-
-  expect(() => {
-    getCorrelationMatrix(() => {})
-  }).toThrow()
-
-  expect(() => {
-    getCorrelationMatrix({})
-  }).toThrow()
+  wrongs.forEach(a => {
+    wrongs.forEach(b => {
+      expect(() => getCorrelationMatrix(a, b)).toThrow()
+    })
+  })
 })

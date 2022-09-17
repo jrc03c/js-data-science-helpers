@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest && eslint src",
+    "test": "./test.sh",
     "build": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify",
     "watch": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify --watch"
   },
@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "esbuild": "^0.14.42",
-    "eslint": "^8.21.0"
+    "eslint": "^8.21.0",
+    "jest": "^29.0.3",
+    "madge": "^5.0.1"
   }
 }

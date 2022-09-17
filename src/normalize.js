@@ -1,59 +1,45 @@
 const {
+  apply,
   assert,
   dropNaN,
   isArray,
-  isJagged,
+  isDataFrame,
+  isSeries,
   mean,
-  shape,
   std,
-  transpose,
 } = require("@jrc03c/js-math-tools")
 
-const errorMessage =
-  "The `normalize` function only works on vectors, matrices, Series, or DataFrames!"
+const common = require("./common.js")
 
 function normalize(x) {
-  if (x.copy && x.values) {
+  if (isDataFrame(x) || isSeries(x)) {
     const out = x.copy()
     out.values = normalize(out.values)
     return out
-  } else if (isArray(x)) {
-    assert(
-      !isJagged(x),
-      "The `normalize` function doesn't work on jagged arrays!"
-    )
-
-    const xShape = shape(x)
-
-    if (xShape.length > 1) {
-      if (xShape.length > 2) {
-        throw new Error(errorMessage)
-      }
-
-      return transpose(transpose(x).map(col => normalize(col)))
-    }
-  } else {
-    throw new Error(errorMessage)
   }
 
-  const numbers = dropNaN(x)
+  assert(
+    isArray(x),
+    "The `normalize` function only works on arrays, Series, and DataFrames!"
+  )
 
-  if (numbers.length === 0) {
-    return x
-  }
-
-  const m = mean(numbers)
-  const s = std(numbers)
-
-  if (s === 0) return x
-
-  return x.map(value => {
-    if (typeof value === "number") {
-      return (value - m) / s
+  const m = (() => {
+    if (common.shouldIgnoreNaNValues) {
+      return mean(dropNaN(x))
     } else {
-      return value
+      return mean(x)
     }
-  })
+  })()
+
+  const s = (() => {
+    if (common.shouldIgnoreNaNValues) {
+      return std(dropNaN(x))
+    } else {
+      return std(x)
+    }
+  })()
+
+  return s === 0 ? x : apply(x, v => (v - m) / s)
 }
 
 module.exports = normalize

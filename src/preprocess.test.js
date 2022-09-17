@@ -1,20 +1,23 @@
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const makeKey = require("@jrc03c/make-key")
-const preprocess = require("./preprocess.js")
-
 const {
   add,
   DataFrame,
-  flatten,
+  dropNaN,
   int,
+  max,
+  min,
   ndarray,
   normal,
   random,
   range,
   scale,
+  Series,
   sort,
   transpose,
 } = require("@jrc03c/js-math-tools")
+
+const getCorrelationMatrix = require("./get-correlation-matrix.js")
+const makeKey = require("@jrc03c/make-key")
+const preprocess = require("./preprocess.js")
 
 // generate data with these types:
 //   - floats
@@ -32,16 +35,16 @@ const {
 // add a few columns that are highly correlated with some of the float columns
 
 test("drops duplicate columns", () => {
-  const temp = random(1000)
-  const x = new DataFrame({ a: temp, b: temp, c: normal(1000), d: temp })
+  const temp = random(100)
+  const x = new DataFrame({ a: temp, b: temp, c: normal(100), d: temp })
   const yPred = preprocess(x)
   expect(yPred.columns).toStrictEqual(["a", "c"])
   expect(yPred.get(null, 0).values).toStrictEqual(temp)
 })
 
 test("drops highly correlated columns", () => {
-  const a = random(1000)
-  const b = add(a, scale(0.0001, normal(1000)))
+  const a = random(100)
+  const b = add(a, scale(0.0001, normal(100)))
   const x = new DataFrame({ a, b })
   const yPred = preprocess(x)
   expect(yPred.columns).toStrictEqual(["a"])
@@ -49,8 +52,8 @@ test("drops highly correlated columns", () => {
 })
 
 test("drops columns with less than 15 non-missing values", () => {
-  const a = random(1000)
-  const b = range(0, 1000).map(() => NaN)
+  const a = random(100)
+  const b = range(0, 100).map(() => NaN)
 
   for (let i = 0; i < 10; i++) {
     b[int(random() * b.length)] = random()
@@ -63,11 +66,11 @@ test("drops columns with less than 15 non-missing values", () => {
 })
 
 test("drops empty columns", () => {
-  const a = random(1000)
-  const b = range(0, 1000).map(() => null)
-  const c = random(1000)
-  const d = range(0, 1000).map(() => undefined)
-  const e = range(0, 1000).map(() => NaN)
+  const a = random(100)
+  const b = range(0, 100).map(() => null)
+  const c = random(100)
+  const d = range(0, 100).map(() => undefined)
+  const e = range(0, 100).map(() => NaN)
   const x = new DataFrame({ a, b, c, d, e })
   const yPred = preprocess(x)
   expect(yPred.columns).toStrictEqual(["a", "c"])
@@ -76,11 +79,11 @@ test("drops empty columns", () => {
 })
 
 test("drops columns with only 1 unique value", () => {
-  const a = random(1000)
+  const a = random(100)
   const r = random()
-  const b = range(0, 1000).map(() => r)
+  const b = range(0, 100).map(() => r)
   const k = makeKey(8)
-  const c = range(0, 1000).map(() => k)
+  const c = range(0, 100).map(() => k)
   const x = new DataFrame({ a, b, c })
   const yPred = preprocess(x)
   expect(yPred.columns).toStrictEqual(["a"])
@@ -88,8 +91,8 @@ test("drops columns with only 1 unique value", () => {
 })
 
 test("clips outliers", () => {
-  const a = random(1000)
-  const b = random(1000)
+  const a = random(100)
+  const b = random(100)
   b[0] = 99999
   const x = new DataFrame({ a, b })
   const yPred = preprocess(x)
@@ -104,8 +107,8 @@ test("clips outliers", () => {
 // for more info.
 // ----------------------------------------------------------------------------
 // test("drops string columns with 100% unique values", () => {
-//   const a = random(1000)
-//   const b = range(0, 1000).map(i => makeKey(8))
+//   const a = random(100)
+//   const b = range(0, 100).map(i => makeKey(8))
 //   const x = new DataFrame({ a, b })
 //   const yPred = preprocess(x)
 //   expect(yPred.columns).toStrictEqual(["a"])
@@ -113,13 +116,13 @@ test("clips outliers", () => {
 // })
 
 test("one-hot-encodes string columns with 7 or fewer unique values", () => {
-  const a = random(1000)
+  const a = random(100)
 
   const values = range(0, 6).map(() => makeKey(8))
-  const b = range(0, 1000).map(() => values[int(random() * values.length)])
+  const b = range(0, 100).map(() => values[int(random() * values.length)])
 
   const moreValues = range(0, 10).map(() => makeKey(8))
-  const c = range(0, 1000).map(
+  const c = range(0, 100).map(
     () => moreValues[int(random() * moreValues.length)]
   )
 
@@ -151,7 +154,7 @@ test("correctly preprocesses an ugly data set", () => {
   // add some columns with only 1 unique value
   // add a few columns that are highly correlated with some of the float columns
   const nullValues = ["null", "NaN", "NA", "N/A", "", "undefined"]
-  const n = 1000
+  const n = 100
   const data = []
   const columns = []
 
@@ -296,51 +299,35 @@ test("correctly preprocesses an ugly data set", () => {
   const c = new DataFrame(getCorrelationMatrix(data2.values))
   c.columns = data2.columns
   c.index = data2.columns
-  expect(flatten(c.values).every(v => v <= 1)).toBe(true)
+  expect(max(dropNaN(c))).toBeLessThanOrEqual(1)
+  expect(min(dropNaN(c))).toBeGreaterThanOrEqual(-1)
 })
 
 test("throws an error when attempting to preprocess non-DataFrames", () => {
-  expect(() => {
-    preprocess()
-  }).toThrow()
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    [2, 3, 4],
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+    new Series({ hello: [10, 20, 30, 40, 50] }),
+  ]
 
-  expect(() => {
-    preprocess(normal([1000, 5]))
-  }).toThrow()
-
-  expect(() => {
-    preprocess(new DataFrame())
-  }).toThrow()
-
-  expect(() => {
-    preprocess(123)
-  }).toThrow()
-
-  expect(() => {
-    preprocess("foo")
-  }).toThrow()
-
-  expect(() => {
-    preprocess(true)
-  }).toThrow()
-
-  expect(() => {
-    preprocess(false)
-  }).toThrow()
-
-  expect(() => {
-    preprocess(null)
-  }).toThrow()
-
-  expect(() => {
-    preprocess(undefined)
-  }).toThrow()
-
-  expect(() => {
-    preprocess(() => {})
-  }).toThrow()
-
-  expect(() => {
-    preprocess({})
-  }).toThrow()
+  wrongs.forEach(item => {
+    expect(() => preprocess(item)).toThrow()
+  })
 })

@@ -15,13 +15,16 @@ function diagonalize(x) {
     return out
   }
 
-  assert(isArray(x), "The `diagonalize` function only works on vectors!")
+  assert(
+    isArray(x),
+    "The `diagonalize` function only works on 1-dimensional arrays and Series!"
+  )
 
   const xShape = shape(x)
 
   assert(
     xShape.length === 1,
-    "The `diagonalize` function only works on vectors!"
+    "The `diagonalize` function only works on 1-dimensional arrays and Series!"
   )
 
   const out = zeros([xShape[0], xShape[0]])

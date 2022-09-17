@@ -1,5 +1,10 @@
+const { MathError } = require("@jrc03c/js-math-tools")
+
 const helpers = {
   clipOutliers: require("./clip-outliers.js"),
+  cohensD: require("./cohens-d.js"),
+  cohensd: require("./cohens-d.js"),
+  common: require("./common.js"),
   containsOnlyNumbers: require("./contains-only-numbers.js"),
   diagonalize: require("./diagonalize.js"),
   getCorrelationMatrix: require("./get-correlation-matrix.js"),
@@ -8,10 +13,12 @@ const helpers = {
   getOneHotEncodings: require("./get-one-hot-encodings.js"),
   getPercentages: require("./get-percentages.js"),
   getPValueMatrix: require("./get-p-value-matrix.js"),
-  gramSchmidtOrthonormalize: require("./gram-schmidt-orthonormalize.js"),
+  IndexMatcher: require("./index-matcher.js"),
   inferType: require("./infer-type.js"),
   isBinary: require("./is-binary.js"),
+  isCorrelationMatrix: require("./is-correlation-matrix.js"),
   normalize: require("./normalize.js"),
+  orthonormalize: require("./orthonormalize.js"),
   preprocess: require("./preprocess.js"),
   project: require("./project.js"),
   pValue: require("./p-value.js"),
@@ -21,9 +28,25 @@ const helpers = {
 
   dump: function () {
     const self = this
+    const public = global || window
+
+    if (!public) {
+      throw new MathError(
+        "Cannot dump functions into global scope because neither `global` nor `window` exist in the current context!"
+      )
+    }
 
     Object.keys(self).forEach(key => {
-      global[key] = self[key]
+      try {
+        Object.defineProperty(public, key, {
+          configurable: false,
+          enumerable: true,
+          writable: false,
+          value: self[key],
+        })
+      } catch (e) {
+        public[key] = self[key]
+      }
     })
   },
 }

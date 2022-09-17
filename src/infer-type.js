@@ -1,11 +1,14 @@
 const {
+  apply,
   assert,
   count,
+  flatten,
   float,
   isArray,
+  isDataFrame,
   isNumber,
+  isSeries,
   isString,
-  shape,
 } = require("@jrc03c/js-math-tools")
 
 const nullValues = ["null", "none", "nan", "na", "n/a", "", "undefined"]
@@ -16,9 +19,13 @@ function cast(value, type) {
     value = "undefined"
   }
 
+  if (type === "null") {
+    return null
+  }
+
   if (type === "number") {
     const out = float(value)
-    if (isNaN(out)) return null
+    if (isNaN(out)) return NaN
     return out
   }
 
@@ -67,14 +74,23 @@ function cast(value, type) {
 }
 
 function inferType(arr) {
-  assert(
-    isArray(arr),
-    "The `inferType` function only works on one-dimensional arrays!"
-  )
+  if (isDataFrame(arr)) {
+    const out = arr.copy()
+    const results = inferType(arr.values)
+    out.values = results.values
+    return { type: results.type, values: out }
+  }
+
+  if (isSeries(arr)) {
+    const out = arr.copy()
+    const results = inferType(arr.values)
+    out.values = results.values
+    return { type: results.type, values: out }
+  }
 
   assert(
-    shape(arr).length === 1,
-    "The `inferType` function only works on one-dimensional arrays!"
+    isArray(arr),
+    "The `inferType` function only works on arrays, Series, and DataFrames!"
   )
 
   // possible types:
@@ -85,7 +101,7 @@ function inferType(arr) {
   // - null
   // - string
   // note: do NOT return arrays!
-  const types = arr.map(v => {
+  const types = flatten(arr).map(v => {
     if (v === undefined) return "null"
 
     if (!isString(v)) {
@@ -134,7 +150,7 @@ function inferType(arr) {
 
   const counts = count(types).sort((a, b) => b.count - a.count)
   const primaryType = counts[0].item
-  return { type: primaryType, values: arr.map(v => cast(v, primaryType)) }
+  return { type: primaryType, values: apply(arr, v => cast(v, primaryType)) }
 }
 
 module.exports = inferType

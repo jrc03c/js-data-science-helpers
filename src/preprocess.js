@@ -4,8 +4,12 @@ const {
   correl,
   DataFrame,
   dropMissing,
+  isArray,
+  isDataFrame,
   isEqual,
+  isJagged,
   set,
+  shape,
   transpose,
 } = require("@jrc03c/js-math-tools")
 
@@ -14,8 +18,17 @@ const getOneHotEncodings = require("./get-one-hot-encodings.js")
 const inferType = require("./infer-type.js")
 
 function preprocess(df) {
+  if (isArray(df)) {
+    assert(
+      shape(df).length === 2 && !isJagged(df),
+      "The `preprocess` function only works on non-jagged 2-dimensional arrays and DataFrames!"
+    )
+
+    return preprocess(new DataFrame(df))
+  }
+
   assert(
-    df.apply && df.columns && df.values,
+    isDataFrame(df),
     "You must pass a DataFrame into the `preprocess` function!"
   )
 

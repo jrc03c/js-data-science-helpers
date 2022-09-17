@@ -1,107 +1,123 @@
-const inferType = require("./infer-type.js")
-
 const {
-  copy,
-  float,
-  int,
+  DataFrame,
+  isEqual,
   normal,
-  random,
   range,
+  Series,
 } = require("@jrc03c/js-math-tools")
 
+const inferType = require("./infer-type.js")
+const makeKey = require("@jrc03c/make-key")
+
 test("correctly infers a variety of data types from strings", () => {
-  // numbers
-  const a = ["2.5", "-3.4", "72", "1e5", "0"]
-  const aTrue = a.map(v => float(v))
-  const aPred = inferType(a).values
-  expect(aPred).toStrictEqual(aTrue)
+  const a = ["2", "3", "4.567"]
+  const bTrue = { type: "number", values: a.map(v => parseFloat(v)) }
+  const bPred = inferType(a)
+  expect(isEqual(bPred, bTrue)).toBe(true)
 
-  // booleans
-  const b = ["true", "false", "TRUE", "True", "False"]
-  const bTrue = [true, false, true, true, false]
-  const bPred = inferType(b).values
-  expect(bPred).toStrictEqual(bTrue)
+  const c = ["true", "True", "TRUE", "false", "False", "FALSE", "yes", "no"]
 
-  // dates
-  const c = range(0, 5).map(() => {
-    const year = int(random() * 50 + 1970)
-    const month = int(random() * 12 + 1)
-    const day = int(random() * 28 + 1)
-    return `${month}-${day}-${year}`
-  })
+  const dTrue = {
+    type: "boolean",
+    values: [true, true, true, false, false, false, true, false],
+  }
 
-  const cTrue = c.map(v => new Date(v))
-  const cPred = inferType(c).values
-  expect(cPred).toStrictEqual(cTrue)
+  const dPred = inferType(c)
+  expect(isEqual(dPred, dTrue)).toBe(true)
 
-  // NOT arrays
-  const d = ["[2, 3, 4]", "[5, 6, 7]", "[8, 9, 10]"]
-  const dTrue = copy(d)
-  const dPred = inferType(d).values
-  expect(dPred).toStrictEqual(dTrue)
+  const e = range(0, 10).map(() => new Date().toJSON())
+  const fTrue = { type: "date", values: e.map(v => new Date(v)) }
+  const fPred = inferType(e)
+  expect(isEqual(fPred, fTrue)).toBe(true)
 
-  // objects
-  const e = [
-    { foo: "bar" },
-    { x: 5, y: 7, z: 9 },
-    { yes: { no: "probably" } },
-  ].map(v => JSON.stringify(v))
+  const g = range(0, 10).map(() => JSON.stringify({ hello: Math.random() }))
+  const hTrue = { type: "object", values: g.map(v => JSON.parse(v)) }
+  const hPred = inferType(g)
+  expect(isEqual(hPred, hTrue)).toBe(true)
 
-  const eTrue = e.map(v => JSON.parse(v))
-  const ePred = inferType(e).values
-  expect(ePred).toStrictEqual(eTrue)
+  const i = ["null", "NaN", "None", "undefined", ""]
+  const jTrue = { type: "null", values: i.map(() => null) }
+  const jPred = inferType(i)
+  expect(isEqual(jPred, jTrue)).toBe(true)
 
-  // otherwise unparseable strings
-  const f = [
-    "foo",
-    "bar",
-    "baz",
-    "'Here's a quote!'",
-    `"Here's another quote," she said.`,
+  const k = range(0, 10).map(() => makeKey(8))
+  const lTrue = { type: "string", values: k }
+  const lPred = inferType(k)
+  expect(isEqual(lPred, lTrue)).toBe(true)
+
+  const m = new Series({ hello: normal(100) })
+  const n = m.apply(v => v.toString())
+  const oTrue = { type: "number", values: m }
+  const oPred = inferType(n)
+  expect(isEqual(oPred, oTrue)).toBe(true)
+
+  const p = [
+    "true",
+    "foobar",
+    "234",
+    "5.67",
+    "false",
+    "FALSE",
+    "False",
+    "TRUE",
+    "yes",
+    "YES",
+    "NO",
   ]
 
-  const fTrue = copy(f)
-  const fPred = inferType(f).values
-  expect(fPred).toStrictEqual(fTrue)
+  const qTrue = {
+    type: "boolean",
 
-  // null values
-  const g = ["1", "2", "3", "null", "5", "NaN", "undefined", "8"]
-  const gTrue = [1, 2, 3, null, 5, null, null, 8]
-  const gPred = inferType(g).values
-  expect(gPred).toStrictEqual(gTrue)
-})
-
-test("correctly infers the data type when the types are mixed", () => {
-  const a = ["1", "2", "3", "four", "5", "six"]
-  const aTrue = [1, 2, 3, null, 5, null]
-  const aPred = inferType(a).values
-  expect(aPred).toStrictEqual(aTrue)
-
-  const b = normal(1000).map(v => v.toString())
-
-  for (let i = 0; i < 0.25 * b.length; i++) {
-    const index = int(random() * b.length)
-    b[index] = "true"
+    values: [
+      true,
+      null,
+      null,
+      null,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+    ],
   }
 
-  expect(inferType(b).type).toBe("number")
+  const qPred = inferType(p)
+  expect(isEqual(qPred, qTrue)).toBe(true)
 
-  const c = normal(1000).map(v => v.toString())
+  const r = new DataFrame({ foo: [2, "3", 4], bar: [5, 6, "seven"] })
 
-  for (let i = 0; i < 0.75 * c.length; i++) {
-    const index = int(random() * c.length)
-    c[index] = new Date().toJSON()
+  const sTrue = {
+    type: "number",
+    values: new DataFrame({ foo: [2, 3, 4], bar: [5, 6, NaN] }),
   }
 
-  expect(inferType(c).type).toBe("date")
+  const sPred = inferType(r)
+  expect(isEqual(sPred, sTrue)).toBe(true)
 
-  const d = range(0, 1000).map(() => {
-    if (random() < 0.1) {
-      return "sldkfjsldkfjsldkjfsldkfj"
-    } else {
-      return JSON.stringify({ foo: "bar" })
-    }
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+  ]
+
+  wrongs.forEach(item => {
+    expect(() => inferType(item)).toThrow()
   })
-
-  expect(inferType(d).type).toBe("object")
 })

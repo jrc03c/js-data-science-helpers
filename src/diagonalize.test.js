@@ -1,87 +1,65 @@
 const {
-  flatten,
+  DataFrame,
   isDataFrame,
+  isEqual,
   normal,
   Series,
-  set,
-  shape,
-  sort,
 } = require("@jrc03c/js-math-tools")
+
 const diagonalize = require("./diagonalize.js")
 
-test("diagonalizes a small vector", () => {
-  const x = [1, 2, 3]
+test("tests that an array can be correctly diagonalized", () => {
+  const a = [2, 3, 4]
 
-  const yTrue = [
-    [1, 0, 0],
-    [0, 2, 0],
-    [0, 0, 3],
-  ]
-
-  const yPred = diagonalize(x)
-  expect(yPred).toStrictEqual(yTrue)
-})
-
-test("diagonalizes a large vector", () => {
-  const x = normal(100)
-  const yPred = diagonalize(x)
-  expect(shape(yPred)).toStrictEqual([100, 100])
-  expect(sort(set(flatten(yPred)))).toStrictEqual(sort(set(x.concat([0]))))
-})
-
-test("diagonalizes a Series", () => {
-  const s = new Series([2, 3, 4])
-  const t = diagonalize(s)
-  expect(isDataFrame(t)).toBe(true)
-  expect(t.shape).toStrictEqual([3, 3])
-  expect(t.index).toStrictEqual(s.index)
-  expect(t.columns).toStrictEqual(s.index)
-
-  expect(t.values).toStrictEqual([
+  const bTrue = [
     [2, 0, 0],
     [0, 3, 0],
     [0, 0, 4],
-  ])
-})
+  ]
 
-test("throws an error when attempting to diagonalize non-vectors", () => {
-  expect(() => {
-    diagonalize()
-  }).toThrow()
+  const bPred = diagonalize(a)
+  expect(isEqual(bPred, bTrue)).toBe(true)
 
-  expect(() => {
-    diagonalize(normal([5, 5, 5]))
-  }).toThrow()
+  const c = normal(100)
+  const dPred = diagonalize(c)
 
-  expect(() => {
-    diagonalize(123)
-  }).toThrow()
+  dPred.forEach((row, i) => {
+    expect(row[i]).toBe(c[i])
+  })
 
-  expect(() => {
-    diagonalize("foo")
-  }).toThrow()
+  const e = new Series({ hello: normal(100) })
+  const fPred = diagonalize(e)
+  expect(isDataFrame(fPred)).toBe(true)
+  expect(isEqual(fPred.index, fPred.columns)).toBe(true)
+  expect(isEqual(fPred.values, diagonalize(e.values))).toBe(true)
 
-  expect(() => {
-    diagonalize(true)
-  }).toThrow()
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    [
+      [2, 3, 4],
+      [5, 6, 7],
+    ],
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+    new DataFrame({ foo: [1, 2, 4, 8, 16], bar: [1, 3, 9, 27, 81] }),
+  ]
 
-  expect(() => {
-    diagonalize(false)
-  }).toThrow()
-
-  expect(() => {
-    diagonalize(null)
-  }).toThrow()
-
-  expect(() => {
-    diagonalize(undefined)
-  }).toThrow()
-
-  expect(() => {
-    diagonalize(() => {})
-  }).toThrow()
-
-  expect(() => {
-    diagonalize({})
-  }).toThrow()
+  wrongs.forEach(item => {
+    expect(() => diagonalize(item)).toThrow()
+  })
 })

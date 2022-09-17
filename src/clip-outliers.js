@@ -1,53 +1,62 @@
 const {
   abs,
-  add,
+  apply,
   assert,
   clamp,
   copy,
+  divide,
   dropNaN,
+  flatten,
   isArray,
   isDataFrame,
-  isNested,
   isNumber,
   isSeries,
   max,
   median,
   min,
-  pow,
-  scale,
-  shape,
   sort,
+  subtract,
 } = require("@jrc03c/js-math-tools")
 
+const common = require("./common.js")
+const containsOnlyNumbers = require("./contains-only-numbers.js")
 const isBinary = require("./is-binary.js")
-const divide = (a, b) => scale(a, pow(b, -1))
-const subtract = (a, b) => add(a, scale(b, -1))
 
 function clipOutliers(x, maxScore) {
-  if (isSeries(x)) {
+  if (isDataFrame(x) || isSeries(x)) {
     const out = x.copy()
-    out.values = clipOutliers(out.values, maxScore)
+    out._values = clipOutliers(out._values, maxScore)
     return out
   }
 
-  if (isDataFrame(x)) {
-    return x.copy().apply(col => clipOutliers(col.values, maxScore))
-  }
+  assert(
+    isArray(x),
+    "The `clipOutliers` function only works on arrays, Series, and DataFrames!"
+  )
 
   maxScore = maxScore || 5
 
-  assert(isNumber(maxScore), "`maxScore` must be a number!")
-  assert(isArray(x), "`x` must be a one-dimensional array!")
+  assert(
+    isNumber(maxScore),
+    "Any `maxScore` value passed into the `clipOutliers` function must be a number!"
+  )
 
-  if (isNested(x)) {
-    return x.map(row => clipOutliers(row, maxScore))
+  if (!common.shouldIgnoreNaNValues) {
+    if (!containsOnlyNumbers(x)) {
+      return apply(x, () => NaN)
+    }
   }
 
-  assert(shape(x).length === 1, "`x` must be a one-dimensional array!")
+  const xFlat = flatten(x)
+  const numericalValues = dropNaN(xFlat)
 
-  const numericalValues = dropNaN(x)
-  if (isBinary(numericalValues)) return x
-  if (numericalValues.length === 0) return x
+  if (isBinary(numericalValues)) {
+    return x
+  }
+
+  if (numericalValues.length === 0) {
+    return x
+  }
 
   const xMedian = median(numericalValues)
   let xMad = median(abs(subtract(numericalValues, xMedian)))
@@ -77,15 +86,13 @@ function clipOutliers(x, maxScore) {
   const score = max(divide(abs(subtract(numericalValues, xMedian)), xMad))
 
   if (score > maxScore || outlierIsImmediatelyAboveOrBelowMedian) {
-    const out = x.map(v => {
-      if (typeof v === "number") {
+    return apply(x, v => {
+      if (isNumber(v)) {
         return clamp(v, xMedian - maxScore * xMad, xMedian + maxScore * xMad)
       } else {
         return v
       }
     })
-
-    return out
   } else {
     return x
   }

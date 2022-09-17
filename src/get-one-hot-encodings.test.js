@@ -1,72 +1,72 @@
 const {
-  count,
-  indexOf,
-  int,
+  DataFrame,
+  isEqual,
   normal,
-  random,
-  range,
-  sum,
+  round,
+  Series,
+  set,
+  sort,
+  transpose,
 } = require("@jrc03c/js-math-tools")
 
 const getOneHotEncodings = require("./get-one-hot-encodings.js")
 
-test("one-hot-encodes a small array", () => {
-  const name = "test"
-  const values = ["foo", "bar", "baz"]
+test("tests that values can be correctly one-hot-encoded", () => {
+  const a = [2, 3, 4]
+  const bTrue = { foo_3: [0, 1, 0], foo_4: [0, 0, 1] }
+  const bPred = getOneHotEncodings("foo", a)
+  expect(isEqual(bPred, bTrue)).toBe(true)
 
-  const yTrue = {
-    test_bar: [0, 1, 0],
-    test_baz: [0, 0, 1],
-  }
+  const c = ["a", "a", "a", "b", "b", "b"]
+  const dTrue = { hello_b: [0, 0, 0, 1, 1, 1] }
+  const dPred = getOneHotEncodings("hello", c)
+  expect(isEqual(dPred, dTrue)).toBe(true)
 
-  const yPred = getOneHotEncodings(name, values)
-  expect(yPred).toStrictEqual(yTrue)
-})
+  const e = new Series({ hello: round(sort(normal(100))) })
+  const fTypes = sort(set(e.values))
 
-test("one-hot-encodes a large array", () => {
-  const name = "test"
-  const values = ["a", "b", "c", "d"]
+  const fTrue = new DataFrame(
+    transpose(fTypes.slice(1).map(v => e.values.map(x => (x === v ? 1 : 0))))
+  )
 
-  const x = range(0, 100).map(() => {
-    return values[int(random() * values.length)]
+  fTrue.columns = fTypes.slice(1).map(v => "hello_" + v.toString())
+  fTrue.index = e.index.slice()
+  const fPred = getOneHotEncodings(e)
+  expect(isEqual(fPred, fTrue)).toBe(true)
+
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    [
+      [2, 3, 4],
+      [5, 6, 7],
+    ],
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
+    new DataFrame({ foo: [1, 2, 4, 8, 16], bar: [1, 3, 9, 27, 81] }),
+  ]
+
+  wrongs.forEach(item => {
+    expect(() => getOneHotEncodings(item)).toThrow()
   })
 
-  const yPred = getOneHotEncodings(name, x)
-  const counts = count(x)
-
-  values
-    .filter(v => v !== x[0])
-    .forEach(v => {
-      const colname = "test_" + v
-      expect(sum(yPred[colname])).toBe(
-        counts.filter(c => c.item === v)[0].count
-      )
-      expect(indexOf(x, v)).toStrictEqual(indexOf(yPred[colname], 1))
+  wrongs.forEach(a => {
+    wrongs.forEach(b => {
+      expect(() => getOneHotEncodings(a, b)).toThrow()
     })
-})
-
-test("throws an error when attempting to one-hot-encode non-string variable names and non-vectors", () => {
-  expect(() => {
-    getOneHotEncodings()
-  }).toThrow()
-
-  expect(() => {
-    getOneHotEncodings("foo", normal([2, 3, 4]))
-  }).toThrow()
-
-  expect(() => {
-    getOneHotEncodings(123, 456)
-  }).toThrow()
-
-  expect(() => {
-    getOneHotEncodings(true, false)
-  }).toThrow()
-
-  expect(() => {
-    getOneHotEncodings(undefined, null)
-  }).toThrow()
-
-  expect(() => {
-    getOneHotEncodings(() => {}, {})
-  }).toThrow()
+  })
 })

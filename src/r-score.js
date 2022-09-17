@@ -3,7 +3,9 @@ const {
   add,
   assert,
   isArray,
+  isDataFrame,
   isEqual,
+  isSeries,
   mean,
   pow,
   scale,
@@ -16,34 +18,42 @@ const {
 const containsOnlyNumbers = require("./contains-only-numbers.js")
 const subtract = (a, b) => add(a, scale(b, -1))
 
-function rScore(xtrue, xpred) {
+function rScore(xTrue, xPred) {
+  if (isDataFrame(xTrue) || isSeries(xTrue)) {
+    return rScore(xTrue.values, xPred)
+  }
+
+  if (isDataFrame(xPred) || isSeries(xPred)) {
+    return rScore(xTrue, xPred.values)
+  }
+
   assert(
-    isArray(xtrue),
+    isArray(xTrue),
     "You must pass two same-shaped numerical arrays into the `rScore` function!"
   )
 
   assert(
-    isArray(xpred),
+    isArray(xPred),
     "You must pass two same-shaped numerical arrays into the `rScore` function!"
   )
 
   assert(
-    isEqual(shape(xtrue), shape(xpred)),
+    isEqual(shape(xTrue), shape(xPred)),
     "You must pass two same-shaped numerical arrays into the `rScore` function!"
   )
 
   assert(
-    containsOnlyNumbers(xtrue),
+    containsOnlyNumbers(xTrue),
     "You must pass two same-shaped numerical arrays into the `rScore` function!"
   )
 
   assert(
-    containsOnlyNumbers(xpred),
+    containsOnlyNumbers(xPred),
     "You must pass two same-shaped numerical arrays into the `rScore` function!"
   )
 
-  const num = sum(pow(subtract(xtrue, xpred), 2))
-  const den = sum(pow(subtract(xtrue, mean(xtrue)), 2))
+  const num = sum(pow(subtract(xTrue, xPred), 2))
+  const den = sum(pow(subtract(xTrue, mean(xTrue)), 2))
   if (den === 0) return NaN
   const r2 = 1 - num / den
   return sign(r2) * sqrt(abs(r2))

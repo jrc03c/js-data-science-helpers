@@ -1,80 +1,68 @@
-const { normal } = require("@jrc03c/js-math-tools")
+const {
+  count,
+  DataFrame,
+  isEqual,
+  normal,
+  round,
+  Series,
+  sort,
+} = require("@jrc03c/js-math-tools")
+
 const getPercentages = require("./get-percentages.js")
 
-test("gets percentages of values in a small array", () => {
-  const x = [2, 3, 3, 4]
+test("tests that percentages of items in an array can be computed correctly", () => {
+  const a = [2, 3, 3, 4]
 
-  const yTrue = [
+  const bTrue = [
     { item: 2, count: 1, percentage: 0.25 },
     { item: 3, count: 2, percentage: 0.5 },
     { item: 4, count: 1, percentage: 0.25 },
   ]
 
-  const yPred = getPercentages(x)
-  expect(yPred).toStrictEqual(yTrue)
-})
+  const bPred = getPercentages(a)
+  expect(isEqual(bPred, bTrue)).toBe(true)
 
-test("gets percentages of values in a big array", () => {
-  const x = []
+  const c = round(normal([2, 3, 4, 5]))
 
-  for (let i = 0; i < 330; i++) x.push(5)
-  for (let i = 0; i < 250; i++) x.push(10)
-  for (let i = 0; i < 400; i++) x.push(15)
-  for (let i = 0; i < 20; i++) x.push(20)
+  const dTrue = sort(
+    count(c).map(v => {
+      v.percentage = v.count / c.length
+      return v
+    }),
+    (a, b) => a.item - b.item
+  )
 
-  const yTrue = [
-    { item: 5, count: 330, percentage: 0.33 },
-    { item: 10, count: 250, percentage: 0.25 },
-    { item: 15, count: 400, percentage: 0.4 },
-    { item: 20, count: 20, percentage: 0.02 },
+  const dPred = sort(getPercentages(c), (a, b) => a.item - b.item)
+  expect(isEqual(dPred, dTrue)).toBe(true)
+
+  const e = new Series({ hello: round(normal(100)) })
+  expect(isEqual(getPercentages(e), getPercentages(e.values))).toBe(true)
+
+  const f = new DataFrame({ foo: round(normal(100)), bar: round(normal(100)) })
+  expect(isEqual(getPercentages(f), getPercentages(f.values))).toBe(true)
+
+  const wrongs = [
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
+    "foo",
+    true,
+    false,
+    null,
+    undefined,
+    Symbol.for("Hello, world!"),
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
   ]
 
-  const yPred = getPercentages(x)
-  expect(yPred).toStrictEqual(yTrue)
-})
-
-test("throws an error when attempting to get percentages in non-arrays", () => {
-  expect(() => {
-    getPercentages()
-  }).toThrow()
-
-  expect(() => {
-    getPercentages([])
-  }).not.toThrow()
-
-  expect(() => {
-    getPercentages(normal([5, 5, 5, 5]))
-  }).not.toThrow()
-
-  expect(() => {
-    getPercentages(123)
-  }).toThrow()
-
-  expect(() => {
-    getPercentages("foo")
-  }).toThrow()
-
-  expect(() => {
-    getPercentages(true)
-  }).toThrow()
-
-  expect(() => {
-    getPercentages(false)
-  }).toThrow()
-
-  expect(() => {
-    getPercentages(null)
-  }).toThrow()
-
-  expect(() => {
-    getPercentages(undefined)
-  }).toThrow()
-
-  expect(() => {
-    getPercentages(() => {})
-  }).toThrow()
-
-  expect(() => {
-    getPercentages({})
-  }).toThrow()
+  wrongs.forEach(item => {
+    expect(() => getPercentages(item)).toThrow()
+  })
 })

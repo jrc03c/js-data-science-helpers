@@ -1,32 +1,31 @@
 const {
+  assert,
   flatten,
   isArray,
   isDataFrame,
   isNumber,
   isSeries,
-  set,
 } = require("@jrc03c/js-math-tools")
 
 function containsOnlyNumbers(x) {
-  if (isSeries(x)) {
+  if (isDataFrame(x) || isSeries(x)) {
     return containsOnlyNumbers(x.values)
   }
 
-  if (isDataFrame(x)) {
-    return containsOnlyNumbers(x.values)
+  assert(
+    isArray(x),
+    "The `containsOnlyNumbers` function only works on arrays, Series, and DataFrames!"
+  )
+
+  const temp = flatten(x)
+
+  for (let i = 0; i < temp.length; i++) {
+    if (!isNumber(temp[i])) {
+      return false
+    }
   }
 
-  if (isNumber(x)) {
-    return true
-  }
-
-  if (isArray(x)) {
-    const temp = flatten(x)
-    const types = set(temp.map(v => typeof v))
-    return types.length === 1 && types[0] === "number"
-  }
-
-  return false
+  return true
 }
 
 module.exports = containsOnlyNumbers

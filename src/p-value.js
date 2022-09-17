@@ -2,7 +2,11 @@ const {
   abs,
   assert,
   dropNaNPairwise,
+  flatten,
   isArray,
+  isDataFrame,
+  isEqual,
+  isSeries,
   mean,
   remap,
   round,
@@ -11,6 +15,7 @@ const {
   std,
 } = require("@jrc03c/js-math-tools")
 
+const common = require("./common.js")
 const zTable = require("./z-table.json")
 
 function probability(z) {
@@ -19,27 +24,26 @@ function probability(z) {
 }
 
 function ttest(a, b) {
-  assert(
-    isArray(a) && shape(a).length === 1,
-    "You must pass two one-dimensional arrays into the `pValue` (AKA `ttest`) function!"
-  )
+  if (isDataFrame(a) || isSeries(a)) {
+    return ttest(a.values, b)
+  }
+
+  if (isDataFrame(b) || isSeries(b)) {
+    return ttest(a, b.values)
+  }
 
   assert(
-    isArray(b) && shape(b).length === 1,
-    "You must pass two one-dimensional arrays into the `pValue` (AKA `ttest`) function!"
+    isArray(a) && isArray(b) && isEqual(shape(a), shape(b)),
+    "You must pass two identically-shaped arrays, Series, or DataFrames into the `pValue` function!"
   )
 
-  const [aTemp, bTemp] = dropNaNPairwise(a, b)
+  const [aTemp, bTemp] = common.shouldIgnoreNaNValues
+    ? dropNaNPairwise(flatten(a), flatten(b))
+    : [flatten(a), flatten(b)]
 
-  assert(
-    aTemp.length > 0,
-    "There are no numerical values in the first vector you passed into the `pValue` (AKA `ttest`) function!"
-  )
-
-  assert(
-    bTemp.length > 0,
-    "There are no numerical values in the second vector you passed into the `pValue` (AKA `ttest`) function!"
-  )
+  if (aTemp.length === 0 || bTemp.length === 0) {
+    return NaN
+  }
 
   const m1 = mean(aTemp)
   const m2 = mean(bTemp)

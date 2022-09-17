@@ -1,129 +1,72 @@
-const normalize = require("./normalize.js")
-
 const {
   abs,
-  add,
   DataFrame,
-  dropNaN,
+  isEqual,
   mean,
   normal,
   random,
   range,
-  round,
-  scale,
   Series,
-  shape,
   std,
-  transpose,
 } = require("@jrc03c/js-math-tools")
 
-test("normalizes an empty array", () => {
-  expect(normalize([])).toStrictEqual([])
-})
+const normalize = require("./normalize.js")
 
-test("normalizes a vector with NaN values", () => {
-  const x = [1, 2, "three", 4, 5]
-  const y = normalize(x)
+test("tests that data can be normalized correctly", () => {
+  const a = range(0, 1000).map(() => random())
+  const b = normalize(a)
+  expect(abs(std(b) - 1)).toBeLessThan(0.01)
+  expect(abs(mean(b))).toBeLessThan(0.01)
 
-  expect(y.length).toBe(x.length)
-  expect(y[2]).toBe(x[2])
-  expect(abs(mean(dropNaN(y)))).toBeLessThan(1e-5)
-  expect(abs(std(dropNaN(y)) - 1)).toBeLessThan(1e-5)
-})
+  const c = normal(1000).map(v => v * 100 + 100)
+  const d = normalize(c)
+  expect(abs(std(d) - 1)).toBeLessThan(0.01)
+  expect(abs(mean(d))).toBeLessThan(0.01)
 
-test("normalizes an already-normalized vector", () => {
-  const x = normalize(normal(1000))
-  expect(abs(mean(x))).toBeLessThan(1e-5)
-  expect(abs(std(x) - 1)).toBeLessThan(1e-5)
-})
+  const e = random([2, 3, 4, 5, 6])
+  const f = normalize(e)
+  expect(abs(std(f) - 1)).toBeLessThan(0.01)
+  expect(abs(mean(f))).toBeLessThan(0.01)
 
-test("normalizes a vector", () => {
-  const x = normalize(scale(add(random(1000), -100), 50))
-  expect(abs(mean(x))).toBeLessThan(1e-5)
-  expect(abs(std(x) - 1)).toBeLessThan(1e-5)
-})
+  const g = new Series({ hello: random(100) })
+  const hTrue = g.copy()
+  hTrue.values = normalize(hTrue.values)
+  const hPred = normalize(g)
+  expect(isEqual(hPred, hTrue)).toBe(true)
 
-test("normalizes a vector with only 1 unique value", () => {
-  const x = range(0, 1000).map(() => 5)
-  const yPred = normalize(x)
-  expect(yPred).toStrictEqual(x)
-})
-
-test("normalizes a matrix", () => {
-  const x = normal([100, 10])
-  const y = normalize(x)
-
-  expect(y).not.toStrictEqual(x)
-  expect(shape(y)).toStrictEqual(shape(x))
-
-  transpose(y).forEach(col => {
-    expect(abs(mean(col))).toBeLessThan(1e-5)
-    expect(abs(std(col) - 1)).toBeLessThan(1e-5)
-  })
-})
-
-test("normalizes each column in a DataFrame one-at-a-time", () => {
-  let x = new DataFrame({
-    a: range(0, 1000),
-    b: random(1000),
-    c: normal(1000),
-    d: round(random(1000)),
+  const i = new DataFrame({
+    foo: random(100),
+    bar: random(100),
+    baz: random(100),
   })
 
-  x = x.apply(col => normalize(col.values))
+  const jTrue = i.copy()
+  jTrue.values = normalize(jTrue.values)
+  const jPred = normalize(i)
+  expect(isEqual(jPred, jTrue)).toBe(true)
 
-  x.columns.forEach(col => {
-    const values = x.get(null, col).values
-    expect(abs(mean(values))).toBeLessThan(1e-5)
-    expect(abs(std(values) - 1)).toBeLessThan(1e-5)
-  })
-})
-
-test("normalizes a Series", () => {
-  const x = new Series(random(1000))
-  const y = normalize(x)
-  expect(y instanceof Series).toBe(true)
-  expect(y.name).toBe(x.name)
-  expect(y.index).toStrictEqual(x.index)
-  expect(y.values.length).toBe(x.values.length)
-  expect(abs(mean(y.values))).toBeLessThan(1e-5)
-  expect(abs(std(y.values) - 1)).toBeLessThan(1e-5)
-})
-
-test("normalizes a DataFrame", () => {
-  const x = new DataFrame(random([100, 5]))
-  const y = normalize(x)
-  expect(y instanceof DataFrame).toBe(true)
-  expect(y.index).toStrictEqual(x.index)
-  expect(y.columns).toStrictEqual(x.columns)
-  expect(shape(y.values)).toStrictEqual(shape(x.values))
-
-  transpose(y.values).forEach(col => {
-    expect(abs(mean(col))).toBeLessThan(1e-5)
-    expect(abs(std(col) - 1)).toBeLessThan(1e-5)
-  })
-})
-
-test("throws an error when attempting to normalize inappropriate values", () => {
   const wrongs = [
-    normal([5, 5, 5]),
-    [
-      [2, 3],
-      [4, 5, 6],
-      [7, 8, 9, 10],
-    ],
-    123,
+    0,
+    1,
+    2.3,
+    -2.3,
+    Infinity,
+    -Infinity,
+    NaN,
     "foo",
     true,
     false,
     null,
     undefined,
-    {},
+    Symbol.for("Hello, world!"),
+    x => x,
+    function (x) {
+      return x
+    },
+    { hello: "world" },
   ]
 
   wrongs.forEach(item => {
-    expect(() => {
-      normalize(item)
-    }).toThrow()
+    expect(() => normalize(item)).toThrow()
   })
 })

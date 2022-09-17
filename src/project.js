@@ -1,7 +1,32 @@
-const { assert, dot, isArray, scale, shape } = require("@jrc03c/js-math-tools")
+const {
+  assert,
+  dot,
+  isArray,
+  isSeries,
+  scale,
+  Series,
+  shape,
+} = require("@jrc03c/js-math-tools")
+
 const containsOnlyNumbers = require("./contains-only-numbers.js")
 
 function project(v, u) {
+  if (isSeries(v)) {
+    if (isSeries(u)) {
+      return new Series(project(v.values, u.values))
+    } else {
+      const out = v.copy()
+      out.values = project(v.values, u)
+      return out
+    }
+  }
+
+  if (isSeries(u)) {
+    const out = u.copy()
+    out.values = project(v, u.values)
+    return out
+  }
+
   assert(isArray(v), "`project` only works on vectors!")
   assert(isArray(u), "`project` only works on vectors!")
   assert(containsOnlyNumbers(v), "`project` only works on vectors of numbers!")

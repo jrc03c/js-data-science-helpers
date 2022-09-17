@@ -1,57 +1,73 @@
 const {
-  assert,
+  DataFrame,
+  isArray,
   isDataFrame,
-  isEqual,
-  set,
+  isNumber,
+  MathError,
   sort,
-  transpose,
 } = require("@jrc03c/js-math-tools")
 
-const containsOnlyNumbers = require("./contains-only-numbers.js")
+const getCorrelationMatrix = require("./get-correlation-matrix.js")
+const isCorrelationMatrix = require("./is-correlation-matrix.js")
 
-function getHighlyCorrelatedColumns(correlations) {
-  assert(
-    isDataFrame(correlations),
-    "You must pass a correlation matrix DataFrame into the `getHighlyCorrelatedColumns` function!"
-  )
+function getHighlyCorrelatedColumns(a, b, threshold) {
+  threshold = Object.values(arguments).find(v => isNumber(v)) || 1 - 1e-5
 
-  assert(
-    containsOnlyNumbers(correlations),
-    "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must contain only numbers!"
-  )
+  const c = (() => {
+    const arrays = Object.values(arguments).filter(
+      v => isArray(v) || isDataFrame(v)
+    )
 
-  assert(
-    isEqual(correlations.values, transpose(correlations.values)),
-    "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must be symmetrical!"
-  )
+    if (arrays.length === 1) {
+      const x = arrays[0]
 
-  assert(
-    isEqual(correlations.columns, correlations.index),
-    "The correlation matrix DataFrame passed into the `getHighlyCorrelatedColumns` function must be symmetrical! (Specifically, the row and column names didn't match in this case!)"
-  )
+      if (isCorrelationMatrix(x)) {
+        return isDataFrame(x) ? x : new DataFrame(x)
+      } else {
+        const out = getCorrelationMatrix(x, null)
+        return isDataFrame(out) ? out : new DataFrame(out)
+      }
+    }
+
+    if (arrays.length === 2) {
+      const out = getCorrelationMatrix(arrays[0], arrays[1])
+      return isDataFrame(out) ? out : new DataFrame(out)
+    }
+
+    throw new MathError(
+      "You must pass 1 or 2 2-dimensional arrays or DataFrames into the `getHighlyCorrelatedColumns` function!"
+    )
+  })()
 
   const out = {}
 
-  for (let i = 0; i < correlations.index.length; i++) {
-    for (let j = 0; j < correlations.columns.length; j++) {
-      if (i !== j) {
-        const value = correlations.values[i][j]
+  c.values.forEach((row, i) => {
+    row.forEach((value, j) => {
+      if (isNumber(value) && value > threshold) {
+        const rowName = c.index[i]
+        const colName = c.columns[j]
 
-        // note that this only detects columns that are highly POSITIVELY correlated!
-        if (1 - value < 1e-5) {
-          const rowName = correlations.index[i]
-          const colName = correlations.columns[j]
-          if (!out[rowName]) out[rowName] = []
-          if (!out[colName]) out[colName] = []
+        if (!out[rowName]) {
+          out[rowName] = []
+        }
+
+        if (out[rowName].indexOf(colName) < 0) {
           out[rowName].push(colName)
+        }
+
+        if (!out[colName]) {
+          out[colName] = []
+        }
+
+        if (out[colName].indexOf(rowName) < 0) {
           out[colName].push(rowName)
         }
       }
-    }
-  }
+    })
+  })
 
   Object.keys(out).forEach(key => {
-    out[key] = sort(set(out[key]))
+    out[key] = sort(out[key])
   })
 
   return out

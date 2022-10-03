@@ -28,9 +28,9 @@ const helpers = {
 
   dump: function () {
     const self = this
-    const public = global || window
+    const pub = global || window
 
-    if (!public) {
+    if (!pub) {
       throw new MathError(
         "Cannot dump functions into global scope because neither `global` nor `window` exist in the current context!"
       )
@@ -38,14 +38,14 @@ const helpers = {
 
     Object.keys(self).forEach(key => {
       try {
-        Object.defineProperty(public, key, {
+        Object.defineProperty(pub, key, {
           configurable: false,
           enumerable: true,
           writable: false,
           value: self[key],
         })
       } catch (e) {
-        public[key] = self[key]
+        pub[key] = self[key]
       }
     })
   },

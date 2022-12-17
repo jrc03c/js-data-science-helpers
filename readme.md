@@ -38,6 +38,10 @@ require("@jrc03c/js-data-science-helpers").dump()
 </script>
 ```
 
+# To do
+
+- At some point, the `clipOutliers` function provided the option of taking the log of the values after clipping them. I'm not sure why I dropped this, but I should probably take a closer look at whether it's useful or not.
+
 # API
 
 ### `clipOutliers(x, maxScore=5)`

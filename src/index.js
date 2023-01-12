@@ -25,6 +25,7 @@ const helpers = {
   rScore: require("./r-score.js"),
   sortCorrelationMatrix: require("./sort-correlation-matrix.js"),
   standardize: require("./standardize.js"),
+  trainTestSplit: require("./train-test-split"),
 
   dump: function () {
     const self = this

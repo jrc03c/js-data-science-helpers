@@ -263,6 +263,10 @@ Sorts a correlation matrix (array or `DataFrame`) so that variables near each ot
 
 Identical to the `normalize` function.
 
+### `trainTestSplit(a, b, c, ..., testSize=0.1, shouldShuffle=true)`
+
+Splits the given data sets into train and test sets in the same way as [sklearn's `train_test_split` function](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html).
+
 # Notes
 
 ### Handling NaN values

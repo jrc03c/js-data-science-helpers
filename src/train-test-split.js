@@ -20,10 +20,8 @@ module.exports = function trainTestSplit() {
   const testSizeArg = args.find(a => isNumber(a))
   const testSize = isUndefined(testSizeArg) ? 0.1 : testSizeArg
 
-  assert(isBoolean(shouldShuffle), "`shouldShuffle` must be a boolean!")
-
   assert(
-    isNumber(testSize) && testSize > 0 && testSize < 1,
+    testSize > 0 && testSize < 1,
     "`testSize` must be a number between 0 and 1 (exclusive on both ends)!"
   )
 

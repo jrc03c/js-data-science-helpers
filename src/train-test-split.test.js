@@ -55,3 +55,18 @@ test("tests that `trainTestSplit` splits data correctly", () => {
   expect(isEqual(cTestTrue.index, cTestPred.index)).toBe(true)
   expect(cTestTrue.name).toBe(cTestPred.name)
 })
+
+test("tests that `trainTestSplit` throws errors at the right times", () => {
+  // no data sets at all
+  expect(() => trainTestSplit(0.1, true)).toThrow()
+
+  // data sets of different lengths
+  const a = normal(100)
+  const b = normal(200)
+  expect(() => trainTestSplit(a, b)).toThrow()
+
+  // wrong test size
+  const c = normal(100)
+  const d = normal(100)
+  expect(() => trainTestSplit(c, d, 234)).toThrow()
+})

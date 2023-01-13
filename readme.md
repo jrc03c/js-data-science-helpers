@@ -263,9 +263,25 @@ Sorts a correlation matrix (array or `DataFrame`) so that variables near each ot
 
 Identical to the `normalize` function.
 
+### `StandardScaler`
+
+Transforms and/or untransforms 1- or 2-dimensional data in basically the same way as the `normalize` function. However, having the functionality wrapped in a class makes it easier to apply the same transformation or untransformation across multiple datasets. Its functionality is supposed to mimic [sklearn's `StandardScaler`](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html).
+
+#### `StandardScaler.fit(x)`
+
+Learns the means and standard deviations of each column in `x`. If `x` is a 1-dimensional array or `Series`, then it's treated as a 1-column matrix or `DataFrame` respectively.
+
+#### `StandardScaler.transform(x)`
+
+Transforms each column in `x` by subtracting that column's corresponding mean and dividing by that column's corresponding standard deviation (i.e., the means and standard deviations learned in the `fit` method). If `x` is a 1-dimensional array or `Series`, then it's treated as a 1-column matrix or `DataFrame` respectively. The number of columns in `x` must be the same as the number of columns in the data on which the `StandardScaler` instance was trained.
+
+#### `StandardScaler.untransform(x)`
+
+Reverses the transformation done by the `transform` method. Specifically, it transforms each column in `x` by multiplying by that column's corresponding standard deviation and adding that column's corresponding mean. If `x` is a 1-dimensional array or `Series`, then it's treated as a 1-column matrix or `DataFrame` respectively. The number of columns in `x` must be the same as the number of columns in the data on which the `StandardScaler` instance was trained.
+
 ### `trainTestSplit(a, b, c, ..., testSize=0.1, shouldShuffle=true)`
 
-Splits the given data sets into train and test sets in the same way as [sklearn's `train_test_split` function](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html).
+Splits the given datasets into train and test sets in the same way as [sklearn's `train_test_split` function](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html).
 
 # Notes
 

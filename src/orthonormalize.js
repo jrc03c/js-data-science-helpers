@@ -11,9 +11,9 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const containsOnlyNumbers = require("./contains-only-numbers.js")
-const getMagnitude = require("./get-magnitude.js")
-const project = require("./project.js")
+const containsOnlyNumbers = require("./contains-only-numbers")
+const getMagnitude = require("./get-magnitude")
+const project = require("./project")
 
 function orthonormalize(x) {
   if (isDataFrame(x)) {

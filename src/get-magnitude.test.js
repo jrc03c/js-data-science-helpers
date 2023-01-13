@@ -1,6 +1,6 @@
 const { DataFrame, flatten, normal, Series } = require("@jrc03c/js-math-tools")
-const common = require("./common.js")
-const getMagnitude = require("./get-magnitude.js")
+const common = require("./common")
+const getMagnitude = require("./get-magnitude")
 
 test("tests that the magnitudes of various arrays, Series, and DataFrames can be correctly computed", () => {
   expect(getMagnitude([3])).toBe(3)

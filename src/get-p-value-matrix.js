@@ -10,8 +10,8 @@ const {
   ndarray,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
-const pValue = require("./p-value.js")
+const common = require("./common")
+const pValue = require("./p-value")
 
 function stamp(x) {
   const prop = "@jrc03c/js-data-science-helpers/get-p-value-matrix"

@@ -10,7 +10,7 @@ const {
   std,
 } = require("@jrc03c/js-math-tools")
 
-const normalize = require("./normalize.js")
+const normalize = require("./normalize")
 
 test("tests that data can be normalized correctly", () => {
   const a = range(0, 1000).map(() => random())

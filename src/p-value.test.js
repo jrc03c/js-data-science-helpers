@@ -1,5 +1,5 @@
 const { DataFrame, normal, Series } = require("@jrc03c/js-math-tools")
-const pValue = require("./p-value.js")
+const pValue = require("./p-value")
 
 test("tests that p-values can be correctly computed", () => {
   const a = normal(100)

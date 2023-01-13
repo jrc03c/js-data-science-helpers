@@ -9,8 +9,8 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
-const getPValueMatrix = require("./get-p-value-matrix.js")
+const common = require("./common")
+const getPValueMatrix = require("./get-p-value-matrix")
 
 test("gets a p-value matrix from a matrix containing identical columns", () => {
   const a = normal(100)

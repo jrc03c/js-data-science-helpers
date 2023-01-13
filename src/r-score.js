@@ -15,7 +15,7 @@ const {
   sum,
 } = require("@jrc03c/js-math-tools")
 
-const containsOnlyNumbers = require("./contains-only-numbers.js")
+const containsOnlyNumbers = require("./contains-only-numbers")
 const subtract = (a, b) => add(a, scale(b, -1))
 
 function rScore(xTrue, xPred) {

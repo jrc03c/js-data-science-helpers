@@ -12,8 +12,8 @@ const {
   zeros,
 } = require("@jrc03c/js-math-tools")
 
-const clipOutliers = require("./clip-outliers.js")
-const common = require("./common.js")
+const clipOutliers = require("./clip-outliers")
+const common = require("./common")
 
 test("tests that outliers can be correctly clipped", () => {
   expect(isEqual(clipOutliers(zeros(100)), zeros(100))).toBe(true)

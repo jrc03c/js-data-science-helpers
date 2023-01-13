@@ -14,9 +14,9 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const clipOutliers = require("./clip-outliers.js")
-const getOneHotEncodings = require("./get-one-hot-encodings.js")
-const inferType = require("./infer-type.js")
+const clipOutliers = require("./clip-outliers")
+const getOneHotEncodings = require("./get-one-hot-encodings")
+const inferType = require("./infer-type")
 
 function preprocess(df, maxUniqueStrings, correlationThreshold) {
   maxUniqueStrings = isNumber(maxUniqueStrings) ? maxUniqueStrings : 7

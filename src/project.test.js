@@ -7,7 +7,7 @@ const {
   Series,
 } = require("@jrc03c/js-math-tools")
 
-const project = require("./project.js")
+const project = require("./project")
 
 test("tests that vectors can be correctly projected onto other vectors", () => {
   const a = [4, 3]

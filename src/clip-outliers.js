@@ -18,9 +18,9 @@ const {
   subtract,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
-const containsOnlyNumbers = require("./contains-only-numbers.js")
-const isBinary = require("./is-binary.js")
+const common = require("./common")
+const containsOnlyNumbers = require("./contains-only-numbers")
+const isBinary = require("./is-binary")
 
 function clipOutliers(x, maxScore) {
   if (isDataFrame(x) || isSeries(x)) {

@@ -1,6 +1,6 @@
 const { DataFrame, isEqual, normal, Series } = require("@jrc03c/js-math-tools")
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const sortCorrelationMatrix = require("./sort-correlation-matrix.js")
+const getCorrelationMatrix = require("./get-correlation-matrix")
+const sortCorrelationMatrix = require("./sort-correlation-matrix")
 
 test("sorts a random correlation matrix", () => {
   // I haven't really thought of how to construct a good test for this yet,

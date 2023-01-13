@@ -15,7 +15,7 @@ const {
   std,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
+const common = require("./common")
 const zTable = require("./z-table.json")
 
 function probability(z) {

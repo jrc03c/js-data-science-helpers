@@ -7,7 +7,7 @@ const {
   Series,
 } = require("@jrc03c/js-math-tools")
 
-const IndexMatcher = require("./index-matcher.js")
+const IndexMatcher = require("./index-matcher")
 
 test("tests that indices in Series and DataFrames can be correctly matched after dropping missing and/or NaN values", () => {
   const a = new Series({ hello: [2, 3, null, 4] })

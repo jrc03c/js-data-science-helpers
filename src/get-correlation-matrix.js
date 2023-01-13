@@ -11,7 +11,7 @@ const {
   ndarray,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
+const common = require("./common")
 
 function stamp(x) {
   const prop = "@jrc03c/js-data-science-helpers/get-correlation-matrix"

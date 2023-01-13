@@ -8,8 +8,8 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const orthonormalize = require("./orthonormalize.js")
+const getCorrelationMatrix = require("./get-correlation-matrix")
+const orthonormalize = require("./orthonormalize")
 
 test("tests that matrices can be correctly orthonormalized", () => {
   const a = normal([1000, 5])

@@ -6,7 +6,7 @@ const {
   Series,
 } = require("@jrc03c/js-math-tools")
 
-const diagonalize = require("./diagonalize.js")
+const diagonalize = require("./diagonalize")
 
 test("tests that an array can be correctly diagonalized", () => {
   const a = [2, 3, 4]

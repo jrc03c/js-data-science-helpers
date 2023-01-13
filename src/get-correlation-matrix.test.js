@@ -10,9 +10,9 @@ const {
   shape,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const orthonormalize = require("./orthonormalize.js")
+const common = require("./common")
+const getCorrelationMatrix = require("./get-correlation-matrix")
+const orthonormalize = require("./orthonormalize")
 
 test("tests that correlation matrices can be correctly computed", () => {
   const a = [

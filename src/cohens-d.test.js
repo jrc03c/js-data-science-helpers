@@ -1,6 +1,6 @@
 const { DataFrame, normal, Series } = require("@jrc03c/js-math-tools")
-const cohensd = require("./cohens-d.js")
-const common = require("./common.js")
+const cohensd = require("./cohens-d")
+const common = require("./common")
 
 test("tests that Cohen's D can be correctly calculated", () => {
   const a = normal(100)

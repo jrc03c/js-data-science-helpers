@@ -8,7 +8,7 @@ const {
   sort,
 } = require("@jrc03c/js-math-tools")
 
-const getPercentages = require("./get-percentages.js")
+const getPercentages = require("./get-percentages")
 
 test("tests that percentages of items in an array can be computed correctly", () => {
   const a = [2, 3, 3, 4]

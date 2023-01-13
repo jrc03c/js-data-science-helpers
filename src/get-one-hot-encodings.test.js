@@ -9,7 +9,7 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const getOneHotEncodings = require("./get-one-hot-encodings.js")
+const getOneHotEncodings = require("./get-one-hot-encodings")
 
 test("tests that values can be correctly one-hot-encoded", () => {
   const a = [2, 3, 4]

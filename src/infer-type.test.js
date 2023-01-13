@@ -6,7 +6,7 @@ const {
   Series,
 } = require("@jrc03c/js-math-tools")
 
-const inferType = require("./infer-type.js")
+const inferType = require("./infer-type")
 const makeKey = require("@jrc03c/make-key")
 
 test("correctly infers a variety of data types from strings", () => {

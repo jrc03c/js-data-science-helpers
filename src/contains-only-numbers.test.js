@@ -7,7 +7,7 @@ const {
   Series,
 } = require("@jrc03c/js-math-tools")
 
-const containsOnlyNumbers = require("./contains-only-numbers.js")
+const containsOnlyNumbers = require("./contains-only-numbers")
 
 test("tests that arrays containing only numbers can be correctly identified", () => {
   expect(containsOnlyNumbers([2, 3, 4])).toBe(true)

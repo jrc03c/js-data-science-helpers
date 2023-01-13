@@ -9,9 +9,9 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
-const getHighlyCorrelatedColumns = require("./get-highly-correlated-columns.js")
-const orthonormalize = require("./orthonormalize.js")
+const common = require("./common")
+const getHighlyCorrelatedColumns = require("./get-highly-correlated-columns")
+const orthonormalize = require("./orthonormalize")
 
 test("tests that highly correlated columns in matrices can be correctly identified", () => {
   const a = normal(100)

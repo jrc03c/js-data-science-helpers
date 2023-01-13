@@ -7,8 +7,8 @@ const {
   sort,
 } = require("@jrc03c/js-math-tools")
 
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const isCorrelationMatrix = require("./is-correlation-matrix.js")
+const getCorrelationMatrix = require("./get-correlation-matrix")
+const isCorrelationMatrix = require("./is-correlation-matrix")
 
 function getHighlyCorrelatedColumns(a, b, threshold) {
   threshold = Object.values(arguments).find(v => isNumber(v)) || 1 - 1e-5

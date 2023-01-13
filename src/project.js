@@ -8,7 +8,7 @@ const {
   shape,
 } = require("@jrc03c/js-math-tools")
 
-const containsOnlyNumbers = require("./contains-only-numbers.js")
+const containsOnlyNumbers = require("./contains-only-numbers")
 
 function project(v, u) {
   if (isSeries(v)) {

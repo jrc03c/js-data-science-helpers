@@ -1,4 +1,4 @@
-const normalize = require("./normalize.js")
+const normalize = require("./normalize")
 
 function standardize() {
   return normalize(...arguments)

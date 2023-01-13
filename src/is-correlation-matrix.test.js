@@ -1,6 +1,6 @@
 const { copy, DataFrame, normal, Series } = require("@jrc03c/js-math-tools")
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
-const isCorrelationMatrix = require("./is-correlation-matrix.js")
+const getCorrelationMatrix = require("./get-correlation-matrix")
+const isCorrelationMatrix = require("./is-correlation-matrix")
 
 test("tests that correlation matrices can be correctly identified", () => {
   const a = normal([100, 5])

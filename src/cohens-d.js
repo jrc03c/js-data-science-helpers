@@ -8,7 +8,7 @@ const {
   variance,
 } = require("@jrc03c/js-math-tools")
 
-const common = require("./common.js")
+const common = require("./common")
 
 function cohensd(arr1, arr2) {
   if (isSeries(arr1)) {

@@ -8,7 +8,7 @@ const {
   zeros,
 } = require("@jrc03c/js-math-tools")
 
-const isBinary = require("./is-binary.js")
+const isBinary = require("./is-binary")
 
 test("tests that arrays, Series, and DataFrames can be correctly identified as binary", () => {
   expect(isBinary(0)).toBe(true)

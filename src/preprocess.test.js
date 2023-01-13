@@ -15,9 +15,9 @@ const {
   transpose,
 } = require("@jrc03c/js-math-tools")
 
-const getCorrelationMatrix = require("./get-correlation-matrix.js")
+const getCorrelationMatrix = require("./get-correlation-matrix")
 const makeKey = require("@jrc03c/make-key")
-const preprocess = require("./preprocess.js")
+const preprocess = require("./preprocess")
 
 // generate data with these types:
 //   - floats

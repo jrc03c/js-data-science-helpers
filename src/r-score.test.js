@@ -1,5 +1,5 @@
 const { apply, DataFrame, normal, Series } = require("@jrc03c/js-math-tools")
-const rScore = require("./r-score.js")
+const rScore = require("./r-score")
 
 test("gets the r-score of various arrays", () => {
   const a = normal(100)

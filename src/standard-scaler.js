@@ -22,6 +22,7 @@ class StandardScaler {
     self.means = []
     self.stdevs = []
     self.wasFittedOnAVector = false
+    self.hasBeenFitted = false
   }
 
   _getDataArrayAndShape(x) {
@@ -77,11 +78,18 @@ class StandardScaler {
       }
     })
 
+    self.hasBeenFitted = true
     return self
   }
 
   transform(x) {
     const self = this
+
+    if (!self.hasBeenFitted) {
+      throw new Error(
+        "This `StandardScaler` instance hasn't been trained on any data yet! Please use the `fit` method to train it before calling the `transform` method."
+      )
+    }
 
     if (isDataFrame(x)) {
       const out = new DataFrame(self.transform(x.values))
@@ -121,6 +129,12 @@ class StandardScaler {
 
   untransform(x) {
     const self = this
+
+    if (!self.hasBeenFitted) {
+      throw new Error(
+        "This `StandardScaler` instance hasn't been trained on any data yet! Please use the `fit` method to train it before calling the `transform` method."
+      )
+    }
 
     if (isDataFrame(x)) {
       const out = new DataFrame(self.untransform(x.values))

@@ -87,6 +87,13 @@ test("tests that the `StandardScaler` throws errors when asked to transform data
   }
 })
 
+test("tests that the `StandardScaler` throws errors when someone attempts to transform or untransform data before the instance has been trained", () => {
+  const scaler = new StandardScaler()
+  const a = random([100, 10])
+  expect(() => scaler.transform(a)).toThrow()
+  expect(() => scaler.untransform(a)).toThrow()
+})
+
 test("tests that the `StandardScaler` throws errors when given invalid data types", () => {
   const wrongs = [
     0,

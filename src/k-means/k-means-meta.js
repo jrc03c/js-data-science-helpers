@@ -12,7 +12,7 @@ const {
 const { isMatrix, isWholeNumber } = require("./helpers")
 const KMeansPlusPlus = require("./k-means-plus-plus")
 
-class KMeansCV {
+class KMeansMeta {
   constructor(config) {
     if (isUndefined(config)) {
       config = {}
@@ -145,4 +145,4 @@ class KMeansCV {
   }
 }
 
-module.exports = KMeansCV
+module.exports = KMeansMeta

@@ -9,11 +9,11 @@ const {
 } = require("@jrc03c/js-math-tools")
 
 const { accuracy, orderCentroids } = require("./helpers")
-const KMeansCV = require("./k-means-cv")
+const KMeansMeta = require("./k-means-cv")
 const rScore = require("../r-score")
 const trainTestSplit = require("../train-test-split")
 
-test(`tests that the KMeansCV model works correctly`, () => {
+test(`tests that the KMeansMeta model works correctly`, () => {
   const centroidsTrue = normal([5, 10]).map(row =>
     row.map(v => v * 100 + normal() * 100)
   )
@@ -28,7 +28,7 @@ test(`tests that the KMeansCV model works correctly`, () => {
   })
 
   const [xTrain, xTest, labelsTrain, labelsTest] = trainTestSplit(x, labels)
-  const model = new KMeansCV()
+  const model = new KMeansMeta()
   model.fit(xTrain)
   model.centroids = orderCentroids(centroidsTrue, model.centroids)
 

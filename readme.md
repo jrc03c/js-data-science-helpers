@@ -219,14 +219,14 @@ Returns a boolean indicating whether or not the array `x` is jagged / ragged (i.
 
 ### `KMeans`
 
-The two primary _K_-means models from which to choose are `KMeansPlusPlus` and `KMeansCV`. The former should be used if you already know how many clusters there are in your data; otherwise, the latter model can be used to find the optimal _K_-value.
+The two primary _K_-means models from which to choose are `KMeansPlusPlus` and `KMeansMeta`. The former should be used if you already know how many clusters there are in your data; otherwise, the latter model can be used to find the optimal _K_-value.
 
-Although I don't think [sklearn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html) has a comparable `KMeansCV` model, I've nevertheless tried to mimic their API in both of these classes. Importantly, just like sklearn's model, the `score` method returns the _negative_ of the _K_-means objective. Since the _K_-means objective is the within-cluster sum of squared errors, the `score` method returns the negative of that value such that higher scores are better than lower scores, which follows the sklearn scoring convention.
+Although I don't think [sklearn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html) has a comparable `KMeansMeta` model, I've nevertheless tried to mimic their API in both of these classes. Importantly, just like sklearn's model, the `score` method returns the _negative_ of the _K_-means objective. Since the _K_-means objective is the within-cluster sum of squared errors, the `score` method returns the negative of that value such that higher scores are better than lower scores, which follows the sklearn scoring convention.
 
 To use them, import them from the `KMeans` namespace, like this:
 
 ```js
-const { KMeansPlusPlus, KMeansCV } =
+const { KMeansMeta, KMeansPlusPlus } =
   require("@jrc03c/js-data-science-helpers").KMeans
 ```
 
@@ -242,9 +242,9 @@ The constructor for the base model takes a configuration object argument. The on
 
 These four values all become properties of the `KMeansPlusPlus` instance (keeping their same names).
 
-#### `KMeansCV(config)`
+#### `KMeansMeta(config)`
 
-The constructor for the cross-validated model takes a configuration object argument. There are no required properties for this object. Optional properties include:
+The constructor for the meta model takes a configuration object argument. There are no required properties for this object. Optional properties include:
 
 - `ks` = the _K_-values to test; the default value is the range `[1, 16)`
 - `maxRestarts` = the number of restarts to pass into the constructor of the final fitted model (after finding the best _K_)
@@ -252,19 +252,19 @@ The constructor for the cross-validated model takes a configuration object argum
 - `tolerance` = the update distance threshold to pass into the constructor of the final fitted model (after finding the best _K_)
 - `modelClass` = the class definition to use during the fitting process; the default value is the `KMeansPlusPlus` class
 
-#### `(KMeansPlusPlus || KMeansCV).fit(x, progress)`
+#### `(KMeansPlusPlus || KMeansMeta).fit(x, progress)`
 
 Fits the model to the two-dimensional data, `x`. Optionally, a `progress` callback function can be provided. This function takes a single argument that represents the overall completion of the `fit` method (in terms of restarts and iterations) expressed as a fraction between 0 and 1.
 
-#### `(KMeansPlusPlus || KMeansCV).predict(x, centroids)`
+#### `(KMeansPlusPlus || KMeansMeta).predict(x, centroids)`
 
 Returns the labels for each point in `x`. A label is an index into the model's `centroids` array. Optionally, an alternative set of `centroids` can be supplied as the second argument.
 
-#### `(KMeansPlusPlus || KMeansCV).score(x, centroids)`
+#### `(KMeansPlusPlus || KMeansMeta).score(x, centroids)`
 
 Returns the negative of the _K_-means objective. The _K_-means objective is the within-cluster sum of squared errors; so the `score` method returns the negative of that value (so that higher scores are better than lower scores). See the note at the start of this section for more info.
 
-#### `(KMeansPlusPlus || KMeansCV).centroids`
+#### `(KMeansPlusPlus || KMeansMeta).centroids`
 
 The array of learned centroids. It's only available after the `fit` method has been run.
 

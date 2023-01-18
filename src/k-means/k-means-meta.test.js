@@ -9,7 +9,7 @@ const {
 } = require("@jrc03c/js-math-tools")
 
 const { accuracy, orderCentroids } = require("./helpers")
-const KMeansMeta = require("./k-means-cv")
+const KMeansMeta = require("./k-means-meta")
 const rScore = require("../r-score")
 const trainTestSplit = require("../train-test-split")
 

@@ -136,11 +136,11 @@ The `IndexMatcher` class makes it relatively easy to make sure that two `Series`
 
 In the first mode, rows are dropped only if they contain null, undefined, or NaN values. In the second mode, rows are dropped if they contain any non-numerical values.
 
-##### `IndexMatcher.fit(a, b, c, ...)`
+#### `IndexMatcher.fit(a, b, c, ...)`
 
 Records the index which is common to all of the given datasets.
 
-##### `IndexMatcher.transform(a, b, c, ...)`
+#### `IndexMatcher.transform(a, b, c, ...)`
 
 Transforms the given datasets to have the index that was recorded by the `fit` function. Note that a single array containing all of the transformed datasets is returned. So, a common syntax might be something like:
 
@@ -153,7 +153,7 @@ const matcher = new IndexMatcher()
 const [d, e, f] = matcher.fit(a, b, c).transform(a, b, c)
 ```
 
-##### `IndexMatcher.fitAndTransform(a, b, c, ...)`
+#### `IndexMatcher.fitAndTransform(a, b, c, ...)`
 
 Performs the fitting and transforming in a single step. So, similar to the example above:
 
@@ -216,6 +216,57 @@ Returns a boolean indicating whether or not `x` contains only binary data (0s an
 ### `isJagged(x)`
 
 Returns a boolean indicating whether or not the array `x` is jagged / ragged (i.e., whether or not it has nested arrays of inconsistent length).
+
+### `KMeans`
+
+The two primary _K_-means models from which to choose are `KMeansPlusPlus` and `KMeansCV`. The former should be used if you already know how many clusters there are in your data; otherwise, the latter model can be used to find the optimal _K_-value.
+
+Although I don't think [sklearn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html) has a comparable `KMeansCV` model, I've nevertheless tried to mimic their API in both of these classes. Importantly, just like sklearn's model, the `score` method returns the _negative_ of the _K_-means objective. Since the _K_-means objective is the within-cluster sum of squared errors, the `score` method returns the negative of that value such that higher scores are better than lower scores, which follows the sklearn scoring convention.
+
+To use them, import them from the `KMeans` namespace, like this:
+
+```js
+const { KMeansPlusPlus, KMeansCV } =
+  require("@jrc03c/js-data-science-helpers").KMeans
+```
+
+Note that the API is virtually identical across the two classes. The main differences appear in the constructor functions. But the `fit`, `predict`, and `score` methods, as well as the `centroids` property, should work the same way in both classes.
+
+#### `KMeansPlusPlus(config)`
+
+The constructor for the base model takes a configuration object argument. The only required property in this object is `k`, the number of cluster centers (AKA centroids). Optional properties include:
+
+- `maxRestarts` = the number of times that the algorithm is allowed to start over with new a new batch of centroids; the default value is 25
+- `maxIterations` = the number of times within a single restart that the algorithm is allowed to update the centroids' positions; the default value is 100
+- `tolerance` = the update distance threshold below which the algorithm stops iterating; the update distance is the Euclidean distance between one iteration's centroid positions and the next iteration's centroid positions, so if the update is sufficiently small, then we consider the algorithm to have converged and thus stop iterating; the default value is 1e-4
+
+These four values all become properties of the `KMeansPlusPlus` instance (keeping their same names).
+
+#### `KMeansCV(config)`
+
+The constructor for the cross-validated model takes a configuration object argument. There are no required properties for this object. Optional properties include:
+
+- `ks` = the _K_-values to test; the default value is the range `[1, 16)`
+- `maxRestarts` = the number of restarts to pass into the constructor of the final fitted model (after finding the best _K_)
+- `maxIterations` = the number of iterations to pass into the constructor of the final fitted model (after finding the best _K_)
+- `tolerance` = the update distance threshold to pass into the constructor of the final fitted model (after finding the best _K_)
+- `modelClass` = the class definition to use during the fitting process; the default value is the `KMeansPlusPlus` class
+
+#### `(KMeansPlusPlus || KMeansCV).fit(x, progress)`
+
+Fits the model to the two-dimensional data, `x`. Optionally, a `progress` callback function can be provided. This function takes a single argument that represents the overall completion of the `fit` method (in terms of restarts and iterations) expressed as a fraction between 0 and 1.
+
+#### `(KMeansPlusPlus || KMeansCV).predict(x, centroids)`
+
+Returns the labels for each point in `x`. A label is an index into the model's `centroids` array. Optionally, an alternative set of `centroids` can be supplied as the second argument.
+
+#### `(KMeansPlusPlus || KMeansCV).score(x, centroids)`
+
+Returns the negative of the _K_-means objective. The _K_-means objective is the within-cluster sum of squared errors; so the `score` method returns the negative of that value (so that higher scores are better than lower scores). See the note at the start of this section for more info.
+
+#### `(KMeansPlusPlus || KMeansCV).centroids`
+
+The array of learned centroids. It's only available after the `fit` method has been run.
 
 ### `normalize(x)`
 

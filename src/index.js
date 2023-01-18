@@ -17,6 +17,7 @@ const helpers = {
   inferType: require("./infer-type"),
   isBinary: require("./is-binary"),
   isCorrelationMatrix: require("./is-correlation-matrix"),
+  KMeans: require("./k-means"),
   normalize: require("./normalize"),
   orthonormalize: require("./orthonormalize"),
   preprocess: require("./preprocess"),
@@ -28,9 +29,15 @@ const helpers = {
   StandardScaler: require("./standard-scaler"),
   trainTestSplit: require("./train-test-split"),
 
-  dump: function () {
+  dump() {
     const self = this
-    const pub = global || window
+
+    const pub =
+      typeof global !== "undefined"
+        ? global
+        : typeof window !== "undefined"
+        ? window
+        : null
 
     if (!pub) {
       throw new MathError(

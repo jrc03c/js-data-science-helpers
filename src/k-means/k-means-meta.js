@@ -85,7 +85,7 @@ class KMeansMeta {
         maxIterations: 25,
       })
 
-      model.fit(x)
+      model.fit(x, p => (progress ? progress((i + p) / self.ks.length) : null))
       const score = model.score(x)
 
       if (score / lastScore > self.scoreStopRatio) {
@@ -104,6 +104,7 @@ class KMeansMeta {
     })
 
     self.fittedModel.fit(x)
+    if (progress) progress(1)
     return self
   }
 

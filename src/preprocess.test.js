@@ -3,6 +3,7 @@ const {
   DataFrame,
   dropNaN,
   int,
+  isEqual,
   max,
   min,
   ndarray,
@@ -38,8 +39,8 @@ test("drops duplicate columns", () => {
   const temp = random(100)
   const x = new DataFrame({ a: temp, b: temp, c: normal(100), d: temp })
   const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a", "c"])
-  expect(yPred.get(null, 0).values).toStrictEqual(temp)
+  expect(isEqual(yPred.columns, ["a", "c"])).toBe(true)
+  expect(isEqual(yPred.get(null, 0).values, temp)).toBe(true)
 })
 
 test("drops highly correlated columns", () => {
@@ -47,8 +48,8 @@ test("drops highly correlated columns", () => {
   const b = add(a, scale(0.0001, normal(100)))
   const x = new DataFrame({ a, b })
   const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a"])
-  expect(yPred.get(null, 0).values).toStrictEqual(a)
+  expect(isEqual(yPred.columns, ["a"])).toBe(true)
+  expect(isEqual(yPred.get(null, 0).values, a)).toBe(true)
 })
 
 test("drops columns with less than 15 non-missing values", () => {
@@ -61,8 +62,8 @@ test("drops columns with less than 15 non-missing values", () => {
 
   const x = new DataFrame({ a, b })
   const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a"])
-  expect(yPred.get(null, 0).values).toStrictEqual(a)
+  expect(isEqual(yPred.columns, ["a"])).toBe(true)
+  expect(isEqual(yPred.get(null, 0).values, a)).toBe(true)
 })
 
 test("drops empty columns", () => {
@@ -73,9 +74,9 @@ test("drops empty columns", () => {
   const e = range(0, 100).map(() => NaN)
   const x = new DataFrame({ a, b, c, d, e })
   const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a", "c"])
-  expect(yPred.get(null, 0).values).toStrictEqual(a)
-  expect(yPred.get(null, 1).values).toStrictEqual(c)
+  expect(isEqual(yPred.columns, ["a", "c"])).toBe(true)
+  expect(isEqual(yPred.get(null, 0).values, a)).toBe(true)
+  expect(isEqual(yPred.get(null, 1).values, c)).toBe(true)
 })
 
 test("drops columns with only 1 unique value", () => {
@@ -86,8 +87,8 @@ test("drops columns with only 1 unique value", () => {
   const c = range(0, 100).map(() => k)
   const x = new DataFrame({ a, b, c })
   const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a"])
-  expect(yPred.get(null, 0).values).toStrictEqual(a)
+  expect(isEqual(yPred.columns, ["a"])).toBe(true)
+  expect(isEqual(yPred.get(null, 0).values, a)).toBe(true)
 })
 
 test("clips outliers", () => {
@@ -96,9 +97,9 @@ test("clips outliers", () => {
   b[0] = 99999
   const x = new DataFrame({ a, b })
   const yPred = preprocess(x)
-  expect(yPred.columns).toStrictEqual(["a", "b"])
-  expect(yPred.get(null, 0).values).toStrictEqual(a)
-  expect(yPred.get(null, 1).values).not.toStrictEqual(b)
+  expect(isEqual(yPred.columns, ["a", "b"])).toBe(true)
+  expect(isEqual(yPred.get(null, 0).values, a)).toBe(true)
+  expect(isEqual(yPred.get(null, 1).values, b)).toBe(false)
 })
 
 // ----------------------------------------------------------------------------
@@ -111,8 +112,8 @@ test("clips outliers", () => {
 //   const b = range(0, 100).map(i => makeKey(8))
 //   const x = new DataFrame({ a, b })
 //   const yPred = preprocess(x)
-//   expect(yPred.columns).toStrictEqual(["a"])
-//   expect(yPred.get(null, 0).values).toStrictEqual(a)
+//   expect(isEqual(yPred.columns, ["a"])).toBe(true)
+//   expect(isEqual(yPred.get(null, 0).values, a)).toBe(true)
 // })
 
 test("one-hot-encodes string columns with 7 or fewer unique values", () => {
@@ -129,13 +130,16 @@ test("one-hot-encodes string columns with 7 or fewer unique values", () => {
   const x = new DataFrame({ a, b, c })
   const yPred = preprocess(x)
 
-  expect(sort(yPred.columns)).toStrictEqual(
-    sort(
-      ["a", "c"].concat(
-        values.map(v => "b_" + v).filter(v => v !== "b_" + b[0])
+  expect(
+    isEqual(
+      sort(yPred.columns),
+      sort(
+        ["a", "c"].concat(
+          values.map(v => "b_" + v).filter(v => v !== "b_" + b[0])
+        )
       )
     )
-  )
+  ).toBe(true)
 })
 
 test("correctly preprocesses an ugly data set", () => {

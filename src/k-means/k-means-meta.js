@@ -91,7 +91,9 @@ class KMeansMeta {
 
         const gen = model.fit(
           x,
-          progress ? p => progress((p + i) / (self.ks.length + 1)) : null,
+          progress
+            ? (p, c) => progress((p + i) / (self.ks.length + 1), c)
+            : null,
           shouldReturnCallableGenerator
         )
 
@@ -128,12 +130,12 @@ class KMeansMeta {
       self.fittedModel.fit(
         x,
         progress
-          ? p => progress((p + self.ks.length) / (self.ks.length + 1))
+          ? (p, c) => progress((p + self.ks.length) / (self.ks.length + 1), c)
           : null,
         false
       )
 
-      if (progress) progress(1)
+      if (progress) progress(1, self.fittedModel.centroids)
       return self
     }
 

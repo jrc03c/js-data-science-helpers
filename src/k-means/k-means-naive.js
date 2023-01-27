@@ -130,7 +130,8 @@ class KMeansNaive {
 
           if (progress) {
             progress(
-              (restart + iteration / self.maxIterations) / self.maxRestarts
+              (restart + iteration / self.maxIterations) / self.maxRestarts,
+              bestCentroids
             )
           }
 
@@ -151,7 +152,7 @@ class KMeansNaive {
       }
 
       // save the best centroids
-      if (progress) progress(1)
+      if (progress) progress(1, bestCentroids)
       self.centroids = bestCentroids
       return self
     }

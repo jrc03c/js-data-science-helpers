@@ -58,54 +58,98 @@ class KMeansMeta {
     self.fittedModel = null
   }
 
-  fit(x, progress) {
+  fit(x, progress, shouldReturnCallableGenerator) {
     // currently, this method uses the "elbow" method of determining when to
     // stop; but we should probably consider the "silhouette" method as well!
     const self = this
 
-    assert(isMatrix(x), "`x` must be a matrix!")
+    function* generator(x, progress, shouldReturnCallableGenerator) {
+      assert(isMatrix(x), "`x` must be a matrix!")
 
-    if (isDataFrame(x)) {
-      x = x.values
-    }
-
-    if (!isUndefined(progress)) {
-      assert(isFunction(progress), "If defined, `progress` must be a function!")
-    }
-
-    let lastK = self.ks[0]
-    let lastScore = -Infinity
-
-    for (let i = 0; i < self.ks.length; i++) {
-      const k = self.ks[i]
-
-      const model = new self.modelClass({
-        k,
-        maxRestarts: 10,
-        maxIterations: 25,
-      })
-
-      model.fit(x, p => (progress ? progress((i + p) / self.ks.length) : null))
-      const score = model.score(x)
-
-      if (score / lastScore > self.scoreStopRatio) {
-        break
+      if (isDataFrame(x)) {
+        x = x.values
       }
 
-      lastK = k
-      lastScore = score
+      if (!isUndefined(progress)) {
+        assert(
+          isFunction(progress),
+          "If defined, `progress` must be a function!"
+        )
+      }
+
+      let lastK = self.ks[0]
+      let lastScore = -Infinity
+
+      for (let i = 0; i < self.ks.length; i++) {
+        const k = self.ks[i]
+
+        const model = new self.modelClass({
+          k,
+          maxRestarts: 10,
+          maxIterations: 25,
+        })
+
+        const gen = model.fit(
+          x,
+          progress ? p => progress((p + i) / (self.ks.length + 1)) : null,
+          shouldReturnCallableGenerator
+        )
+
+        if (shouldReturnCallableGenerator) {
+          let status = { done: false }
+
+          while (!status.done) {
+            status = gen.next()
+            yield
+          }
+        }
+
+        const score = model.score(x)
+
+        if (score / lastScore > self.scoreStopRatio) {
+          break
+        }
+
+        lastK = k
+        lastScore = score
+
+        if (shouldReturnCallableGenerator) {
+          yield
+        }
+      }
+
+      self.fittedModel = new self.modelClass({
+        k: lastK,
+        maxRestarts: self.maxRestarts,
+        maxIterations: self.maxIterations,
+        tolerance: self.tolerance,
+      })
+
+      self.fittedModel.fit(
+        x,
+        progress
+          ? p => progress((p + self.ks.length) / (self.ks.length + 1))
+          : null,
+        false
+      )
+
+      if (progress) progress(1)
+      return self
     }
 
-    self.fittedModel = new self.modelClass({
-      k: lastK,
-      maxRestarts: self.maxRestarts,
-      maxIterations: self.maxIterations,
-      tolerance: self.tolerance,
-    })
+    const gen = generator(x, progress, shouldReturnCallableGenerator)
 
-    self.fittedModel.fit(x)
-    if (progress) progress(1)
-    return self
+    if (shouldReturnCallableGenerator) {
+      return gen
+    } else {
+      let status = { done: false }
+
+      while (!status.done) {
+        status = gen.next()
+      }
+
+      return self
+    }
   }
 
   predict(x, centroids) {

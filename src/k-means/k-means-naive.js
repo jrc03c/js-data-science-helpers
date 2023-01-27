@@ -54,98 +54,121 @@ class KMeansNaive {
     return shuffle(x).slice(0, self.k)
   }
 
-  fit(x, progress) {
+  fit(x, progress, shouldReturnCallableGenerator) {
     const self = this
 
-    assert(isMatrix(x), "`x` must be a matrix!")
+    function* generator(x, progress, shouldReturnCallableGenerator) {
+      assert(isMatrix(x), "`x` must be a matrix!")
 
-    if (isDataFrame(x)) {
-      x = x.values
-    }
+      if (isDataFrame(x)) {
+        x = x.values
+      }
 
-    if (!isUndefined(progress)) {
-      assert(isFunction(progress), "If defined, `progress` must be a function!")
-    }
+      if (!isUndefined(progress)) {
+        assert(
+          isFunction(progress),
+          "If defined, `progress` must be a function!"
+        )
+      }
 
-    // keep track of the very best centroids and their scores
-    let bestCentroids
-    let bestScore = -Infinity
+      // keep track of the very best centroids and their scores
+      let bestCentroids
+      let bestScore = -Infinity
 
-    // for each restart:
-    for (let restart = 0; restart < self.maxRestarts; restart++) {
-      // generate some new centroids
-      let centroids = self.initializeCentroids(x)
+      // for each restart:
+      for (let restart = 0; restart < self.maxRestarts; restart++) {
+        // generate some new centroids
+        let centroids = self.initializeCentroids(x)
 
-      // for each iteration:
-      for (let iteration = 0; iteration < self.maxIterations; iteration++) {
-        if (progress) {
-          progress(
-            (restart + iteration / self.maxIterations) / self.maxRestarts
-          )
-        }
+        // for each iteration:
+        for (let iteration = 0; iteration < self.maxIterations; iteration++) {
+          // get the labels for the points
+          const labels = self.predict(x, centroids)
 
-        // get the labels for the points
-        const labels = self.predict(x, centroids)
+          // average the points in each cluster
+          const sums = []
+          const counts = zeros(self.k)
 
-        // average the points in each cluster
-        const sums = []
-        const counts = zeros(self.k)
+          x.forEach((p, i) => {
+            const k = labels[i]
 
-        x.forEach((p, i) => {
-          const k = labels[i]
+            if (!sums[k]) {
+              sums[k] = zeros(p.length)
+            }
 
-          if (!sums[k]) {
-            sums[k] = zeros(p.length)
-          }
+            sums[k] = add(sums[k], p)
+            counts[k]++
+          })
 
-          sums[k] = add(sums[k], p)
-          counts[k]++
-        })
+          const newCentroids = range(0, self.k).map(k => {
+            // if for some reason the count for this centroid is 0, then no
+            // points were assigned to this centroid, which means it's no longer
+            // useful; so, instead, we'll just almost-duplicate another centroid
+            // by copying it and adding a little bit of noise to it
+            if (counts[k] === 0) {
+              return add(
+                centroids[parseInt(random() * centroids.length)],
+                scale(0.001, normal(centroids[0].length))
+              )
+            } else {
+              return divide(sums[k], counts[k])
+            }
+          })
 
-        const newCentroids = range(0, self.k).map(k => {
-          // if for some reason the count for this centroid is 0, then no
-          // points were assigned to this centroid, which means it's no longer
-          // useful; so, instead, we'll just almost-duplicate another centroid
-          // by copying it and adding a little bit of noise to it
-          if (counts[k] === 0) {
-            return add(
-              centroids[parseInt(random() * centroids.length)],
-              scale(0.001, normal(centroids[0].length))
-            )
-          } else {
-            return divide(sums[k], counts[k])
-          }
-        })
-
-        try {
-          // if the change from the previous centroids to these new centroids
-          // is very small (i.e., less then `tolerance`), then we should stop
-          // iterating
-          if (distance(centroids, newCentroids) < self.tolerance) {
+          try {
+            // if the change from the previous centroids to these new centroids
+            // is very small (i.e., less then `tolerance`), then we should stop
+            // iterating
+            if (distance(centroids, newCentroids) < self.tolerance) {
+              break
+            }
+          } catch (e) {
             break
           }
-        } catch (e) {
-          break
+
+          centroids = newCentroids
+
+          if (progress) {
+            progress(
+              (restart + iteration / self.maxIterations) / self.maxRestarts
+            )
+          }
+
+          if (shouldReturnCallableGenerator) {
+            yield
+          }
         }
 
-        centroids = newCentroids
+        // after all the iterations are finished, we'll score these centroids
+        const score = self.score(x, centroids)
+
+        // if they do better than the best ones so far, then they become the new
+        // best centroids
+        if (score > bestScore) {
+          bestScore = score
+          bestCentroids = centroids
+        }
       }
 
-      // after all the iterations are finished, we'll score these centroids
-      const score = self.score(x, centroids)
-
-      // if they do better than the best ones so far, then they become the new
-      // best centroids
-      if (score > bestScore) {
-        bestScore = score
-        bestCentroids = centroids
-      }
+      // save the best centroids
+      if (progress) progress(1)
+      self.centroids = bestCentroids
+      return self
     }
 
-    // save the best centroids
-    if (progress) progress(1)
-    self.centroids = bestCentroids
-    return self
+    const gen = generator(x, progress, shouldReturnCallableGenerator)
+
+    if (shouldReturnCallableGenerator) {
+      return gen
+    } else {
+      let status = { done: false }
+
+      while (!status.done) {
+        status = gen.next()
+      }
+
+      return self
+    }
   }
 
   predict(x, centroids) {

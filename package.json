@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./test.sh",
     "build": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify",
-    "watch": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify --watch"
+    "watch": "esbuild src/index.js --bundle --outfile=dist/js-data-science-helpers.js --minify --watch",
+    "pub": "npm version patch --force && npm publish --access=public"
   },
   "keywords": [],
   "author": "jrc03c",

@@ -56,14 +56,15 @@ class KMeansMeta {
     self.scoreStopRatio = 0.85
     self.modelClass = config.modelClass || KMeansPlusPlus
     self.fittedModel = null
+    self._fitState = null
   }
 
-  fit(x, progress, shouldReturnCallableGenerator) {
+  fitStep(x, progress) {
     // currently, this method uses the "elbow" method of determining when to
     // stop; but we should probably consider the "silhouette" method as well!
     const self = this
 
-    function* generator(x, progress, shouldReturnCallableGenerator) {
+    if (!self._fitState) {
       assert(isMatrix(x), "`x` must be a matrix!")
 
       if (isDataFrame(x)) {
@@ -77,81 +78,74 @@ class KMeansMeta {
         )
       }
 
-      let lastK = self.ks[0]
-      let lastScore = -Infinity
-
-      for (let i = 0; i < self.ks.length; i++) {
-        const k = self.ks[i]
-
-        const model = new self.modelClass({
-          k,
-          maxRestarts: 10,
-          maxIterations: 25,
-        })
-
-        const gen = model.fit(
-          x,
-          progress
-            ? (p, c) => progress((p + i) / (self.ks.length + 1), c)
-            : null,
-          shouldReturnCallableGenerator
-        )
-
-        if (shouldReturnCallableGenerator) {
-          let status = { done: false }
-
-          while (!status.done) {
-            status = gen.next()
-            yield
-          }
-        }
-
-        const score = model.score(x)
-
-        if (score / lastScore > self.scoreStopRatio) {
-          break
-        }
-
-        lastK = k
-        lastScore = score
-
-        if (shouldReturnCallableGenerator) {
-          yield
-        }
+      self._fitState = {
+        isFinished: false,
+        lastScore: -Infinity,
+        currentIndex: 0,
       }
+    } else if (self._fitState.isFinished) {
+      return self
+    }
 
+    const k = self.ks[self._fitState.currentIndex]
+
+    const model = new self.modelClass({
+      k,
+      maxRestarts: 10,
+      maxIterations: 20,
+    })
+
+    model.fit(x, p =>
+      progress
+        ? progress((self._fitState.currentIndex + p) / (self.ks.length + 1))
+        : null
+    )
+
+    const score = model.score(x)
+
+    if (score / self._fitState.lastScore > self.scoreStopRatio) {
+      console.log("reached score stop ratio @ k:", k)
+      self._fitState.isFinished = true
+      self._fitState.currentIndex--
+    } else {
+      self._fitState.lastScore = score
+
+      if (self._fitState.currentIndex + 1 >= self.ks.length) {
+        console.log("ran out of ks @ k:", k)
+        self._fitState.isFinished = true
+      } else {
+        self._fitState.currentIndex++
+      }
+    }
+
+    if (self._fitState.isFinished) {
       self.fittedModel = new self.modelClass({
-        k: lastK,
+        k: self.ks[self._fitState.currentIndex],
         maxRestarts: self.maxRestarts,
         maxIterations: self.maxIterations,
-        tolerance: self.tolerance,
       })
 
-      self.fittedModel.fit(
-        x,
-        progress
-          ? (p, c) => progress((p + self.ks.length) / (self.ks.length + 1), c)
-          : null,
-        false
+      self.fittedModel.fit(x, p =>
+        progress ? progress((self.ks.length + p) / (self.ks.length + 1)) : null
       )
 
-      if (progress) progress(1, self.fittedModel.centroids)
-      return self
-    }
-
-    const gen = generator(x, progress, shouldReturnCallableGenerator)
-
-    if (shouldReturnCallableGenerator) {
-      return gen
-    } else {
-      let status = { done: false }
-
-      while (!status.done) {
-        status = gen.next()
+      if (progress) {
+        progress(1)
       }
-
-      return self
     }
+
+    return self
+  }
+
+  fit(x, progress) {
+    const self = this
+    self._fitState = null
+
+    while (!self._fitState || !self._fitState.isFinished) {
+      self.fitStep(x, progress)
+    }
+
+    return self
   }
 
   predict(x, centroids) {

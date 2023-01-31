@@ -2,6 +2,7 @@ const {
   add,
   argmin,
   assert,
+  copy,
   distance,
   divide,
   isDataFrame,
@@ -47,6 +48,7 @@ class KMeansNaive {
     self.maxIterations = config.maxIterations || 100
     self.tolerance = config.tolerance || 1e-4
     self.centroids = null
+    self._fitState = null
   }
 
   initializeCentroids(x) {
@@ -54,10 +56,10 @@ class KMeansNaive {
     return shuffle(x).slice(0, self.k)
   }
 
-  fit(x, progress, shouldReturnCallableGenerator) {
+  fitStep(x, progress) {
     const self = this
 
-    function* generator(x, progress, shouldReturnCallableGenerator) {
+    if (!self._fitState) {
       assert(isMatrix(x), "`x` must be a matrix!")
 
       if (isDataFrame(x)) {
@@ -71,105 +73,117 @@ class KMeansNaive {
         )
       }
 
-      // keep track of the very best centroids and their scores
-      let bestCentroids
-      let bestScore = -Infinity
+      const centroids = self.initializeCentroids(x)
 
-      // for each restart:
-      for (let restart = 0; restart < self.maxRestarts; restart++) {
-        // generate some new centroids
-        let centroids = self.initializeCentroids(x)
-
-        // for each iteration:
-        for (let iteration = 0; iteration < self.maxIterations; iteration++) {
-          // get the labels for the points
-          const labels = self.predict(x, centroids)
-
-          // average the points in each cluster
-          const sums = []
-          const counts = zeros(self.k)
-
-          x.forEach((p, i) => {
-            const k = labels[i]
-
-            if (!sums[k]) {
-              sums[k] = zeros(p.length)
-            }
-
-            sums[k] = add(sums[k], p)
-            counts[k]++
-          })
-
-          const newCentroids = range(0, self.k).map(k => {
-            // if for some reason the count for this centroid is 0, then no
-            // points were assigned to this centroid, which means it's no longer
-            // useful; so, instead, we'll just almost-duplicate another centroid
-            // by copying it and adding a little bit of noise to it
-            if (counts[k] === 0) {
-              return add(
-                centroids[parseInt(random() * centroids.length)],
-                scale(0.001, normal(centroids[0].length))
-              )
-            } else {
-              return divide(sums[k], counts[k])
-            }
-          })
-
-          try {
-            // if the change from the previous centroids to these new centroids
-            // is very small (i.e., less then `tolerance`), then we should stop
-            // iterating
-            if (distance(centroids, newCentroids) < self.tolerance) {
-              break
-            }
-          } catch (e) {
-            break
-          }
-
-          centroids = newCentroids
-
-          if (progress) {
-            progress(
-              (restart + iteration / self.maxIterations) / self.maxRestarts,
-              bestCentroids
-            )
-          }
-
-          if (shouldReturnCallableGenerator) {
-            yield
-          }
-        }
-
-        // after all the iterations are finished, we'll score these centroids
-        const score = self.score(x, centroids)
-
-        // if they do better than the best ones so far, then they become the new
-        // best centroids
-        if (score > bestScore) {
-          bestScore = score
-          bestCentroids = centroids
-        }
+      self._fitState = {
+        currentRestart: 0,
+        currentIteration: 0,
+        currentCentroids: centroids,
+        bestCentroids: centroids,
+        bestScore: -Infinity,
+        isFinished: false,
       }
-
-      // save the best centroids
-      if (progress) progress(1, bestCentroids)
-      self.centroids = bestCentroids
+    } else if (self._fitState.isFinished) {
       return self
     }
 
-    const gen = generator(x, progress, shouldReturnCallableGenerator)
+    // get the labels for the points
+    const labels = self.predict(x, self._fitState.currentCentroids)
 
-    if (shouldReturnCallableGenerator) {
-      return gen
+    // average the points in each cluster
+    const sums = []
+    const counts = zeros(self.k)
+
+    x.forEach((p, i) => {
+      const k = labels[i]
+
+      if (!sums[k]) {
+        sums[k] = zeros(p.length)
+      }
+
+      sums[k] = add(sums[k], p)
+      counts[k]++
+    })
+
+    const newCentroids = range(0, self.k).map(k => {
+      // if for some reason the count for this centroid is 0, then no
+      // points were assigned to this centroid, which means it's no longer
+      // useful; so, instead, we'll just almost-duplicate another centroid
+      // by copying it and adding a little bit of noise to it
+      if (counts[k] === 0) {
+        return add(
+          self._fitState.currentCentroids[
+            parseInt(random() * self._fitState.currentCentroids.length)
+          ],
+          scale(0.001, normal(self._fitState.currentCentroids[0].length))
+        )
+      } else {
+        return divide(sums[k], counts[k])
+      }
+    })
+
+    // if the change from the previous centroids to these new centroids
+    // is very small (i.e., less then `tolerance`), then we should stop
+    // iterating
+    if (
+      distance(self._fitState.currentCentroids, newCentroids) < self.tolerance
+    ) {
+      self._fitState.currentIteration = self.maxIterations - 1
     } else {
-      let status = { done: false }
+      self._fitState.currentCentroids = newCentroids
+    }
 
-      while (!status.done) {
-        status = gen.next()
+    if (progress) {
+      progress(
+        (self._fitState.currentRestart +
+          self._fitState.currentIteration / self.maxIterations) /
+          self.maxRestarts,
+        self
+      )
+    }
+
+    self._fitState.currentIteration++
+
+    if (self._fitState.currentIteration >= self.maxIterations) {
+      const score = self.score(x, self._fitState.currentCentroids)
+
+      if (score > self._fitState.bestScore) {
+        self._fitState.bestScore = score
+
+        self._fitState.bestCentroids = copy(self._fitState.currentCentroids)
       }
 
-      return self
+      self._fitState.currentIteration = 0
+      self._fitState.currentRestart++
+
+      if (self._fitState.currentRestart >= self.maxRestarts) {
+        self._fitState.isFinished = true
+        self.centroids = self._fitState.bestCentroids
+
+        if (progress) {
+          progress(1, self)
+        }
+      } else {
+        const newCentroids = self.initializeCentroids(x)
+        self._fitState.currentCentroids = newCentroids
+      }
     }
+
+    return self
+  }
+
+  fit(x, progress) {
+    const self = this
+
+    if (self._fitState) {
+      self._fitState = null
+    }
+
+    while (!self._fitState || !self._fitState.isFinished) {
+      self.fitStep(x, progress)
+    }
+
+    return self
   }
 
   predict(x, centroids) {

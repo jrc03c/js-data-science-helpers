@@ -53,7 +53,7 @@ class KMeansMeta {
     self.maxRestarts = config.maxRestarts || 25
     self.maxIterations = config.maxIterations || 100
     self.tolerance = config.tolerance || 1e-4
-    self.scoreStopRatio = 0.85
+    self.scoreStopRatio = config.scoreStopRatio || 0.85
     self.modelClass = config.modelClass || KMeansPlusPlus
     self.fittedModel = null
     self._fitState = null

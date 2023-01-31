@@ -64,20 +64,17 @@ class KMeansMeta {
     // stop; but we should probably consider the "silhouette" method as well!
     const self = this
 
+    assert(isMatrix(x), "`x` must be a matrix!")
+
+    if (isDataFrame(x)) {
+      x = x.values
+    }
+
+    if (!isUndefined(progress)) {
+      assert(isFunction(progress), "If defined, `progress` must be a function!")
+    }
+
     if (!self._fitState) {
-      assert(isMatrix(x), "`x` must be a matrix!")
-
-      if (isDataFrame(x)) {
-        x = x.values
-      }
-
-      if (!isUndefined(progress)) {
-        assert(
-          isFunction(progress),
-          "If defined, `progress` must be a function!"
-        )
-      }
-
       self._fitState = {
         isFinished: false,
         lastScore: -Infinity,

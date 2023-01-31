@@ -59,20 +59,17 @@ class KMeansNaive {
   fitStep(x, progress) {
     const self = this
 
+    assert(isMatrix(x), "`x` must be a matrix!")
+
+    if (isDataFrame(x)) {
+      x = x.values
+    }
+
+    if (!isUndefined(progress)) {
+      assert(isFunction(progress), "If defined, `progress` must be a function!")
+    }
+
     if (!self._fitState) {
-      assert(isMatrix(x), "`x` must be a matrix!")
-
-      if (isDataFrame(x)) {
-        x = x.values
-      }
-
-      if (!isUndefined(progress)) {
-        assert(
-          isFunction(progress),
-          "If defined, `progress` must be a function!"
-        )
-      }
-
       const centroids = self.initializeCentroids(x)
 
       self._fitState = {

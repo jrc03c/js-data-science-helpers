@@ -101,14 +101,12 @@ class KMeansMeta {
     const score = model.score(x)
 
     if (score / self._fitState.lastScore > self.scoreStopRatio) {
-      console.log("reached score stop ratio @ k:", k)
       self._fitState.isFinished = true
       self._fitState.currentIndex--
     } else {
       self._fitState.lastScore = score
 
       if (self._fitState.currentIndex + 1 >= self.ks.length) {
-        console.log("ran out of ks @ k:", k)
         self._fitState.isFinished = true
       } else {
         self._fitState.currentIndex++

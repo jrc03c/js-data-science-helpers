@@ -7,8 +7,10 @@ const {
   isArray,
   isDataFrame,
   isEqual,
+  isFunction,
   isJagged,
   isNumber,
+  isUndefined,
   set,
   shape,
   transpose,
@@ -16,14 +18,26 @@ const {
 
 const clipOutliers = require("./clip-outliers")
 const getOneHotEncodings = require("./get-one-hot-encodings")
+const getNthColumn = (x, n) => x.map(row => row[n])
 const inferType = require("./infer-type")
+const isWholeNumber = x => isNumber(x) && (parseInt(x) === x || x === Infinity)
 
-function preprocess(df, maxUniqueStrings, correlationThreshold) {
-  maxUniqueStrings = isNumber(maxUniqueStrings) ? maxUniqueStrings : 7
+function preprocess(df, config) {
+  config = config || {}
 
-  correlationThreshold = isNumber(correlationThreshold)
-    ? correlationThreshold
+  const maxUniqueStrings = isNumber(config.maxUniqueStrings)
+    ? config.maxUniqueStrings
+    : 7
+
+  const minNonMissingValues = isNumber(config.minNonMissingValues)
+    ? config.minNonMissingValues
+    : 15
+
+  const maxCorrelationThreshold = isNumber(config.maxCorrelationThreshold)
+    ? config.maxCorrelationThreshold
     : 1 - 1e-5
+
+  const progress = config.progress || null
 
   if (isArray(df)) {
     assert(
@@ -39,112 +53,147 @@ function preprocess(df, maxUniqueStrings, correlationThreshold) {
     "You must pass a DataFrame into the `preprocess` function!"
   )
 
-  const types = {}
+  assert(
+    isWholeNumber(maxUniqueStrings),
+    "`maxUniqueStrings` must be a whole number!"
+  )
 
-  df = df.apply(col => {
-    const results = inferType(col.values)
-    types[col.name] = results.type
-    return results.values
-  })
+  assert(
+    isWholeNumber(minNonMissingValues),
+    "`minNonMissingValues` must be a whole number!"
+  )
 
-  const columns = copy(df.columns)
-  const x = transpose(df.values)
-  let index = 0
-  let isDone = false
+  assert(
+    isNumber(maxCorrelationThreshold),
+    "`maxCorrelationThreshold` must be a number!"
+  )
 
-  // delete literally identical columns
-  while (!isDone) {
-    const col1 = x[index]
-
-    for (let i = index + 1; i < x.length; i++) {
-      const col2 = x[i]
-
-      if (isEqual(col1, col2)) {
-        columns.splice(i, 1)
-        x.splice(i, 1)
-      }
-    }
-
-    index++
-    isDone = index >= columns.length - 1
+  if (!isUndefined(progress)) {
+    assert(isFunction(progress), "If defined, `progress` must be a function!")
   }
 
-  // only examine each column once!
-  index = 0
-  isDone = false
+  // transpose the data so that it's easier to work with; i.e., grabbing rows is easier
+  // (and much faster) than grabbing columns, though I'm not really sure how expensive
+  // the transpositions are...
+  const types = {}
+  const columnsToDrop = {}
+  const outValues = {}
 
-  while (!isDone) {
-    const colName = columns[index]
-    const values = x[index]
-    if (!values) break
+  // for each row:
+  // - get its column name
+  // - run self-checks:
+  //   - if its column name is in the `columnsToDrop` array, then return
+  //   - get its data type and casted values; if they've already been cached, then retrieve them from the `types` object; otherwise, compute them and cache them in the `types` object; then:
+  //   - if type in [null, object], then add to `columnsToDrop` array and return
+  //   - drop missing values, then:
+  //   - if it has fewer than 15 non-missing values, then add to `columnsToDrop` array and return
+  //   - get the set of values, then:
+  //   - if it has only 1 unique value, then add to `columnsToDrop` array and return
+  //   - if its type is "string" and it has fewer than `maxUniqueStrings` unique values, then one-hot-encode it, add its one-hot-encoded column names to the `columnsToKeep` array, add its original name to the `columnsToDrop` array, and then return
+  // - run other-checks (against other columns that have not already been marked to be dropped)
+  //   - if type is "number" and is highly correlated with another "number" column, then add the latter column name to the `columnsToDrop` array
+  //   - if type is "string" and is identical to another "string" column, then add the latter column name to the `columnsToDrop` array
+  // - if we've made it this far, then add its column name to the `columnsToKeep` array
 
-    // get non-missing values
-    const nonMissingValues = dropMissing(values)
+  const x = df.values
 
-    // if there are fewer than 15 non-missing values, then drop the column
-    if (nonMissingValues.length < 15) {
-      columns.splice(index, 1)
-      x.splice(index, 1)
-      continue
+  df.columns.forEach((colName, j) => {
+    if (columnsToDrop[colName]) return
+
+    const values = getNthColumn(x, j)
+
+    const parsed = (() => {
+      if (types[colName]) {
+        return types[colName]
+      } else {
+        const results = inferType(values)
+        types[colName] = results
+        return results
+      }
+    })()
+
+    if (parsed.type === "null" || parsed.type === "object") {
+      columnsToDrop[colName] = true
+      return
     }
 
-    // if there's only 1 unique value, then drop the column
+    const nonMissingValues = dropMissing(parsed.values)
+
+    if (nonMissingValues.length <= minNonMissingValues) {
+      columnsToDrop[colName] = true
+      return
+    }
+
     const nonMissingValuesSet = set(nonMissingValues)
 
-    if (nonMissingValuesSet.length === 1) {
-      columns.splice(index, 1)
-      x.splice(index, 1)
-      continue
+    if (nonMissingValuesSet.length < 2) {
+      columnsToDrop[colName] = true
+      return
     }
 
-    // get primary data type of the column
-    const type = types[colName]
+    if (
+      parsed.type === "string" &&
+      nonMissingValuesSet.length <= maxUniqueStrings
+    ) {
+      const encodings = getOneHotEncodings(colName, parsed.values)
 
-    if (type === "string") {
-      // if there are up to 7 unique values, then one-hot-encode them
-      if (nonMissingValuesSet.length <= maxUniqueStrings) {
-        const encodings = getOneHotEncodings(colName, values)
+      Object.keys(encodings).forEach(key => {
+        outValues[key] = encodings[key]
+      })
 
-        Object.keys(encodings).forEach(key => {
-          columns.push(key)
-          x.push(encodings[key])
-          types[key] = "number"
-        })
+      columnsToDrop[colName] = true
+      return
+    }
 
-        columns.splice(index, 1)
-        x.splice(index, 1)
-        continue
-      }
-    } else if (type === "number") {
-      const clippedValues = clipOutliers(values)
-      x[index] = clippedValues
-      let wasHighlyCorrelated = false
+    if (parsed.type === "number") {
+      parsed.values = clipOutliers(parsed.values)
+    }
 
-      for (let i = 0; i < index; i++) {
-        const otherValues = x[i]
-        const r = correl(values, otherValues)
+    df.columns.slice(j + 1).forEach((otherColName, k) => {
+      if (columnsToDrop[otherColName]) return
 
-        if (r > correlationThreshold) {
-          columns.splice(index, 1)
-          x.splice(index, 1)
-          wasHighlyCorrelated = true
-          break
+      const otherValues = getNthColumn(x, j + k + 1)
+
+      const otherParsed = (() => {
+        if (types[otherColName]) {
+          return types[otherColName]
+        } else {
+          const results = inferType(otherValues)
+          types[otherColName] = results
+          return results
+        }
+      })()
+
+      if (otherParsed.type !== parsed.type) return
+
+      if (otherParsed.type === "number") {
+        const r = correl(otherParsed.values, parsed.values)
+
+        if (r > maxCorrelationThreshold) {
+          columnsToDrop[otherColName] = true
+          return
         }
       }
 
-      if (wasHighlyCorrelated) continue
-    } else {
-      x.splice(index, 1)
-      columns.splice(index, 1)
-      continue
+      if (
+        otherParsed.type === "string" &&
+        isEqual(otherParsed.values, parsed.values)
+      ) {
+        columnsToDrop[otherColName] = true
+        return
+      }
+    })
+
+    outValues[colName] = parsed.values
+
+    if (progress) {
+      progress(j / df.columns.length)
     }
+  })
 
-    index++
-    isDone = index >= columns.length
-  }
-
-  const out = new DataFrame(transpose(x))
-  out.columns = columns
+  // const out = new DataFrame(transpose(outValues))
+  const out = new DataFrame(outValues)
+  out.index = df.index.slice()
   return out
 }
 

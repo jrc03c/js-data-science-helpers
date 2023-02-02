@@ -286,9 +286,18 @@ ttest_ind(a, b, equal_var=False, nan_policy="omit")
 
 I'm not sure why there's a very slight variation in returned _p_-values between my version of the function and scipy's. It's possible that there's some subtle degrees-of-freedom difference in our implementations; or maybe they have a better way of computing the probability of _t_ (because mine uses a table of values and theirs may use a continuous function or whatever). However, after lots of testing, I feel pretty confident that these small differences are probably not significant. Let me know if you disagree, though. 😊
 
-### `preprocess(df, maxUniqueStrings=7, correlationThreshold=(1 - 1e-5))`
+### `preprocess(df, config)`
 
-Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that contains only numbers and `null` values. The cleaning process involves:
+Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that contains only numbers and `null` values.
+
+The `config` object is optional. If provided, it can contain these values:
+
+- `correlationThreshold` = the coefficient of correlation threshold above which two columns will be considered to be virtually identical (and one will be dropped); the default is `1 - 1e-5 = 0.99999`
+- `maxUniqueStrings` = the number of unique strings above which a column will no longer be eligible for one-hot-encoding; the default is `7`
+- `minNonMissingValues` = the number of non-missing values below which the column will be dropped
+- `progress` = a callback function that is passed a single value in the range `[0, 1]` that represents the fraction of preprocessing completed
+
+The cleaning process involves:
 
 - inferring the types of all columns and casting column values into those inferred types
 - dropping all but 1 of any duplicate columns

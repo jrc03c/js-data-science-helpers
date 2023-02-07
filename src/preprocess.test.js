@@ -307,6 +307,10 @@ test("correctly preprocesses an ugly data set", () => {
   expect(min(dropNaN(c))).toBeGreaterThanOrEqual(-1)
 })
 
+test("tests that columns that have already been parsed are not discarded (unless they fail the usual criteria)", () => {
+  // pass
+})
+
 test("throws an error when attempting to preprocess non-DataFrames", () => {
   const wrongs = [
     0,

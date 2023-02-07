@@ -1,9 +1,9 @@
 const {
   assert,
-  copy,
   correl,
   DataFrame,
   dropMissing,
+  inferType,
   isArray,
   isDataFrame,
   isEqual,
@@ -13,13 +13,11 @@ const {
   isUndefined,
   set,
   shape,
-  transpose,
 } = require("@jrc03c/js-math-tools")
 
 const clipOutliers = require("./clip-outliers")
 const getOneHotEncodings = require("./get-one-hot-encodings")
 const getNthColumn = (x, n) => x.map(row => row[n])
-const inferType = require("./infer-type")
 const isWholeNumber = x => isNumber(x) && (parseInt(x) === x || x === Infinity)
 
 function preprocess(df, config) {
@@ -107,6 +105,11 @@ function preprocess(df, config) {
         return types[colName]
       } else {
         const results = inferType(values)
+
+        if (results.type === "date") {
+          results.values = results.values.map(v => v - 0)
+        }
+
         types[colName] = results
         return results
       }
@@ -159,6 +162,11 @@ function preprocess(df, config) {
           return types[otherColName]
         } else {
           const results = inferType(otherValues)
+
+          if (results.type === "date") {
+            results.values = results.values.map(v => v - 0)
+          }
+
           types[otherColName] = results
           return results
         }
@@ -191,7 +199,6 @@ function preprocess(df, config) {
     }
   })
 
-  // const out = new DataFrame(transpose(outValues))
   const out = new DataFrame(outValues)
   out.index = df.index.slice()
   return out

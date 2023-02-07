@@ -165,50 +165,6 @@ const c = new DataFrame(...)
 const [d, e, f] = new IndexMatcher().fitAndTransform(a, b, c)
 ```
 
-### `inferType(x)`
-
-Given a vector `x`, returns an object with these properties:
-
-- `type` = one of these:
-  - boolean
-  - date
-  - null
-  - number
-  - object
-  - string
-- `values` = all of the values in `x` cast into the inferred type
-
-### Inferrable types
-
-The inferrable types listed above correspond roughly to the main JS data types, but there are a few exceptions.
-
-First, "date" is not a data type in JS. There are `Date` objects, of course, but `typeof new Date()` returns "object". Since dates are commonly stored in datasets and because they come with their own particular set of challenges, I've set these apart as their own data type so that they won't be conflated with other kinds of objects.
-
-Second, arrays are not among the inferrable types because `x` is assumed to be a vector, and allowing `x` to be potentially nested makes it difficult to determine whether `x` is supposed to be a vector, matrix, tensor, mixed data structure, etc. If pass in an array `x` that's nested, then the sub-arrays will be ignored; only the values they contain will be used for inference.
-
-### Alternate values
-
-It's pretty common for datasets to contain boolean-ish and null-ish values, by which I mean string values like "yes", "no", "NaN", "NONE", "undefined", "NA", etc., or even empty strings. Those values are sort of like boolean or null values, but they're not always consistent or suitable for immediate inference by something like the `JSON.parse` function. Therefore, the `inferType` function tries to look for such values. For example, if it encounters a string value like "YES", it counts that value as a boolean, _not_ as a string! In fact, counting a value as a string is the function's very last resort since it's so common for values to be included accidentally as strings. For example, if you use a library like [papaparse](https://www.papaparse.com/) to read a CSV file from disk, then the returned data may just be a matrix of strings and nothing more; i.e., it's probably pretty common for such libraries to avoid making inferences about the data, leaving such work up to the user. So, when the `inferType` function encounters a string value, it does its best to cast it into any other data type first; but if it fails to find any suitable type, it gives up and assumes that the value is just a plain ol' string. Here are the lists of boolean-ish and null-ish values that are parsed as booleans and nulls respectively (accounting for case sensitivity, of course):
-
-Nulls:
-
-- ""
-- "n/a"
-- "na"
-- "nan"
-- "none"
-- "null"
-- "undefined"
-
-Booleans:
-
-- "true"
-- "false"
-- "yes"
-- "no"
-
-This function doesn't cover every possible edge case, of course; it should probably only be expected to work on an average dataset. If your data is especially unusual, please consider manually inferring types some other way.
-
 ### `isBinary(x)`
 
 Returns a boolean indicating whether or not `x` contains only binary data (0s and 1s).

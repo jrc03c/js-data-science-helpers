@@ -14,7 +14,6 @@ const helpers = {
   getPercentages: require("./get-percentages"),
   getPValueMatrix: require("./get-p-value-matrix"),
   IndexMatcher: require("./index-matcher"),
-  inferType: require("./infer-type"),
   isBinary: require("./is-binary"),
   isCorrelationMatrix: require("./is-correlation-matrix"),
   KMeans: require("./k-means"),

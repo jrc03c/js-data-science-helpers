@@ -32,15 +32,29 @@ function getOneHotEncodings() {
   )
 
   const out = {}
-  const colToDrop = name + "_" + values[0]
 
   const colNames = sort(set(values))
+    .filter(v => typeof v !== "number" || v.toString() !== "NaN")
     .filter(v => !isUndefined(v))
     .map(v => name + "_" + v)
-    .filter(v => v !== colToDrop)
+    .slice(0, -1)
 
   colNames.forEach(colName => {
-    out[colName] = values.map(v => (colName === name + "_" + v ? 1 : 0))
+    out[colName] = values.map(v => {
+      if (colName === name + "_" + v) {
+        return 1
+      }
+
+      if (typeof v === "number" && v.toString() === "NaN") {
+        return NaN
+      }
+
+      if (isUndefined(v)) {
+        return NaN
+      }
+
+      return 0
+    })
   })
 
   return out

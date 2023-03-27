@@ -19,7 +19,7 @@ const helpers = {
   KMeans: require("./k-means"),
   normalize: require("./normalize"),
   orthonormalize: require("./orthonormalize"),
-  preprocess: require("./preprocess"),
+  convertToNumerical: require("./convert-to-numerical"),
   project: require("./project"),
   pValue: require("./p-value"),
   rScore: require("./r-score"),

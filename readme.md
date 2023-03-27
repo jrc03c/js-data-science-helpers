@@ -56,6 +56,28 @@ Returns the Cohen's _D_ value for two vectors or `Series` instances `a` vs. `b`.
 
 Returns a boolean indicating whether or not `x` contains only numbers.
 
+### `convertToNumerical(df, config)`
+
+Given a matrix or `DataFrame` and an optional `config` object, returns a cleaned-up matrix or `DataFrame` that contains only numerical values (including `NaN` values).
+
+If provided, the `config` object can contain these values:
+
+- `correlationThreshold` = the coefficient of correlation threshold above which two columns will be considered to be virtually identical (and one will be dropped); the default is `1 - 1e-5 = 0.99999`
+- `maxUniqueValues` = the number of unique values above which a column will no longer be eligible for one-hot-encoding; the default is `7`
+- `minNonMissingValues` = the number of non-missing values below which the column will be dropped; the default is `15`
+- `progress` = a callback function that is passed a single value in the range `[0, 1]` that represents the fraction of preprocessing completed
+
+The cleaning process involves:
+
+- inferring the types of all columns and casting column values into those inferred types, including:
+  - converting booleans to 0s and 1s
+  - converting dates to integers (as milliseconds since the Unix epoch (midnight on January 1, 1970); see [`Date.prototype.getTime()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime))
+- dropping all but 1 of any duplicate or highly correlated columns (i.e., _r_ > `correlationThreshold`)
+- dropping any columns with fewer than 15 non-missing values
+- dropping any columns with only 1 unique value
+- one-hot-encoding any columns where the top `maxUniqueValues` unique values account for at least 90% of all of the values (and if there are any other values left over, then they're returned in an "other" column)
+- dropping all other columns that cannot be converted to numbers (e.g., string columns containing all unique values)
+
 ### `diagonalize(x)`
 
 Turns 1-dimensional array or `Series` `x` into a square matrix with the values of `x` along the main diagonal (top left to bottom right) and zeros everywhere else. For example:
@@ -241,27 +263,6 @@ ttest_ind(a, b, equal_var=False, nan_policy="omit")
 ```
 
 I'm not sure why there's a very slight variation in returned _p_-values between my version of the function and scipy's. It's possible that there's some subtle degrees-of-freedom difference in our implementations; or maybe they have a better way of computing the probability of _t_ (because mine uses a table of values and theirs may use a continuous function or whatever). However, after lots of testing, I feel pretty confident that these small differences are probably not significant. Let me know if you disagree, though. 😊
-
-### `preprocess(df, config)`
-
-Given a matrix or `DataFrame`, returns a cleaned-up matrix or `DataFrame` that contains only numbers and `null` values.
-
-The `config` object is optional. If provided, it can contain these values:
-
-- `correlationThreshold` = the coefficient of correlation threshold above which two columns will be considered to be virtually identical (and one will be dropped); the default is `1 - 1e-5 = 0.99999`
-- `maxUniqueStrings` = the number of unique strings above which a column will no longer be eligible for one-hot-encoding; the default is `7`
-- `minNonMissingValues` = the number of non-missing values below which the column will be dropped
-- `progress` = a callback function that is passed a single value in the range `[0, 1]` that represents the fraction of preprocessing completed
-
-The cleaning process involves:
-
-- inferring the types of all columns and casting column values into those inferred types
-- dropping all but 1 of any duplicate columns
-- dropping any columns with fewer than 15 non-missing values
-- dropping any columns with only 1 unique value
-- one-hot-encoding any string columns where there are no more than `maxUniqueStrings` unique values
-- dropping all but 1 of any highly correlated columns (i.e., _r_ > `correlationThreshold`)
-- dropping all other columns that do not contain strings or numbers
 
 ### `project(v, u)`
 

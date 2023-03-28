@@ -19,7 +19,7 @@ const { stringify } = require("@jrc03c/js-text-tools")
 const getOneHotEncodings = require("./get-one-hot-encodings")
 const isWholeNumber = x => isNumber(x) && (parseInt(x) === x || x === Infinity)
 
-function preprocess(df, config) {
+function convertToNumerical(df, config) {
   config = config || {}
 
   const maxUniqueValues = isNumber(config.maxUniqueValues)
@@ -39,15 +39,15 @@ function preprocess(df, config) {
   if (isArray(df)) {
     assert(
       shape(df).length === 2 && !isJagged(df),
-      "The `preprocess` function only works on non-jagged 2-dimensional arrays and DataFrames!"
+      "The `convertToNumerical` function only works on non-jagged 2-dimensional arrays and DataFrames!"
     )
 
-    return preprocess(new DataFrame(df))
+    return convertToNumerical(new DataFrame(df))
   }
 
   assert(
     isDataFrame(df),
-    "You must pass a DataFrame into the `preprocess` function!"
+    "You must pass a DataFrame into the `convertToNumerical` function!"
   )
 
   assert(
@@ -79,7 +79,11 @@ function preprocess(df, config) {
 
   const out = {}
 
-  df.apply(col => {
+  df.apply((col, colIndex) => {
+    if (progress) {
+      progress(colIndex / df.columns.length)
+    }
+
     const inferred = inferType(col.values)
 
     if (inferred.type === "boolean") {
@@ -191,4 +195,4 @@ function preprocess(df, config) {
   return new DataFrame(out)
 }
 
-module.exports = preprocess
+module.exports = convertToNumerical

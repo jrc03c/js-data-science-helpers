@@ -8,8 +8,7 @@ const {
   isDataFrame,
   isEqual,
   isJagged,
-  max,
-  min,
+  isNumber,
   reverse,
   shape,
   transpose,
@@ -24,7 +23,7 @@ function sortCorrelationMatrix(c) {
   if (isArray(c)) {
     assert(
       shape(c).length === 2 && !isJagged(c),
-      "The `sortCorrelationMatrix` function only works on 2-dimensional arrays and DataFrames!"
+      "The `sortCorrelationMatrix` function only works on non-jagged 2-dimensional arrays and DataFrames!"
     )
 
     const temp = new DataFrame(c)
@@ -34,31 +33,47 @@ function sortCorrelationMatrix(c) {
 
   assert(
     isDataFrame(c),
-    "You must pass a DataFrame into the `sortCorrelationMatrix` function!"
+    "You must pass a 2-dimensional array or DataFrame into the `sortCorrelationMatrix` function!"
   )
 
-  assert(
-    max(c.values) <= 1 && min(c.values) >= -1,
-    "The correlation matrix passed into the `sortCorrelationMatrix` function must not contain values less than -1 or greater than 1!"
-  )
+  // for each value:
+  // - if the value is NaN, then replace it with -Infinity and record its
+  //   original value and position in the matrix
+  // - otherwise, check to make sure that it falls between -1 and 1
+  const temp = c.copy()
+  const nans = []
+
+  temp.values.forEach((row, i) => {
+    row.forEach((v, j) => {
+      if (!isNumber(v)) {
+        nans.push({ row: temp.index[i], col: temp.columns[j], value: v })
+        temp.values[i][j] = -Infinity
+      } else {
+        assert(
+          v >= -1 && v <= 1,
+          "The correlation matrix passed into the `sortCorrelationMatrix` function must not contain values less than -1 or greater than 1!"
+        )
+      }
+    })
+  })
 
   assert(
-    isEqual(c.values, transpose(c.values)),
+    isEqual(temp.values, transpose(temp.values)),
     "The correlation matrix passed into the `sortCorrelationMatrix` function must be symmetrical!"
   )
 
   assert(
-    isEqual(c.index, c.columns),
+    isEqual(temp.index, temp.columns),
     "The correlation matrix passed into the `sortCorrelationMatrix` function must be symmetrical! (In this case, although the values themselves are symmetrical, the row and column names differ.)"
   )
 
-  const freeRows = copy(c.index)
+  const freeRows = copy(temp.index)
   const fixedRows = []
 
   while (freeRows.length > 0) {
     // get row with greatest 2-norm
     if (fixedRows.length === 0) {
-      const index = argmax(c.values.map(row => dot(row, row)))
+      const index = argmax(temp.values.map(row => dot(row, row)))
       fixedRows.push(freeRows[index])
       freeRows.splice(index, 1)
     }
@@ -66,11 +81,11 @@ function sortCorrelationMatrix(c) {
     // get free row with highest correlation with first fixed row
     // and fix it
     else {
-      const lastFixedRowIndex = c.index.indexOf(fixedRows.at(-1))
+      const lastFixedRowIndex = temp.index.indexOf(fixedRows.at(-1))
 
       const nextRowIndex = argmax(
         freeRows.map(rowName => {
-          const row = c.values[c.index.indexOf(rowName)]
+          const row = temp.values[temp.index.indexOf(rowName)]
           return row[lastFixedRowIndex]
         })
       )
@@ -82,7 +97,18 @@ function sortCorrelationMatrix(c) {
   }
 
   const reversedFixedRows = reverse(fixedRows)
-  return c.get(reversedFixedRows, reversedFixedRows)
+  const out = temp.get(reversedFixedRows, reversedFixedRows)
+
+  // if there were any nans in the original matrix, then insert them back into
+  // the output matrix
+  nans.forEach(n => {
+    const i = out.index.indexOf(n.row)
+    const j = out.columns.indexOf(n.col)
+    out.values[i][j] = n.value
+    out.values[j][i] = n.value
+  })
+
+  return out
 }
 
 module.exports = sortCorrelationMatrix

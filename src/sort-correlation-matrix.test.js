@@ -1,23 +1,108 @@
-const { DataFrame, isEqual, normal, Series } = require("@jrc03c/js-math-tools")
+const {
+  add,
+  DataFrame,
+  divide,
+  flatten,
+  int,
+  isEqual,
+  isNumber,
+  max,
+  min,
+  normal,
+  random,
+  range,
+  remap,
+  Series,
+  set,
+  sort,
+} = require("@jrc03c/js-math-tools")
+
 const getCorrelationMatrix = require("./get-correlation-matrix")
 const sortCorrelationMatrix = require("./sort-correlation-matrix")
 
 test("sorts a random correlation matrix", () => {
-  // I haven't really thought of how to construct a good test for this yet,
-  // though the manual testing I've done with it seems to have been successful
-  // so far!
-
   const a = normal([1000, 5])
   const b = getCorrelationMatrix(a)
   expect(() => sortCorrelationMatrix(b)).not.toThrow()
 
   const c = new DataFrame(b)
   c.index = c.columns.slice()
-  expect(() => sortCorrelationMatrix(c)).not.toThrow()
 
-  expect(
-    isEqual(sortCorrelationMatrix(b), sortCorrelationMatrix(c).values)
-  ).toBe(true)
+  const d = sortCorrelationMatrix(c)
+  expect(isEqual(sortCorrelationMatrix(b), d.values)).toBe(true)
+
+  d.values.forEach((row, i) => {
+    if (i < d.shape[0] - 2) {
+      const r1 = d.values[(i + 1, i)]
+      const r2 = d.values[(i + 2, i + 1)]
+
+      if (!isNaN(r1) && !isNaN(r2)) {
+        expect(r2).toBeGreaterThanOrEqual(r1)
+      }
+    }
+  })
+
+  // make sure that NaNs are handled correctly by replacing them with (e.g.)
+  // -Infinity before sorting and then re-replacing them with NaNs afterwards!
+  const e = new DataFrame(normal([10, 10]))
+  e.index = e.columns
+  e.values = divide(add(e.values, e.transpose().values), 2)
+  e.values = remap(e.values, min(e.values), max(e.values), -1, 1)
+
+  e.values.forEach((row, i) => {
+    e.values[i][i] = 1
+  })
+
+  const possibles = [
+    NaN,
+    null,
+    undefined,
+    true,
+    false,
+    "Hello, world!",
+    { foo: "bar" },
+    Symbol.for("friend"),
+    x => x,
+  ]
+
+  const nans = []
+
+  range(0, 0.1 * e.shape[0] * e.shape[1]).forEach(() => {
+    const i = int(random() * e.shape[0])
+    const j = int(random() * e.shape[1])
+
+    const v = possibles[int(random() * possibles.length)]
+    e.values[i][j] = v
+    e.values[j][i] = v
+    nans.push(v)
+  })
+
+  try {
+    const f = sortCorrelationMatrix(e)
+    let containsNaNs = false
+
+    f.values.forEach(row => {
+      row.forEach(v => {
+        if (!isNumber(v)) {
+          containsNaNs = true
+        }
+      })
+    })
+
+    expect(containsNaNs).toBe(true)
+    expect(isEqual(sort(set(e.columns)), sort(set(f.columns)))).toBe(true)
+    expect(isEqual(sort(set(e.index)), sort(set(f.index)))).toBe(true)
+
+    const eFlat = flatten(e.values)
+
+    nans.forEach(v => {
+      expect(eFlat.some(other => isEqual(v, other))).toBe(true)
+    })
+  } catch (f) {
+    console.log(f)
+    const failed = true
+    expect(failed).toBe(false)
+  }
 
   const wrongs = [
     0,

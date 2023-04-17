@@ -10,13 +10,13 @@ const {
 
 const getPercentages = require("./get-percentages")
 
-test("tests that percentages of items in an array can be computed correctly", () => {
+test("tests that percentages of values in an array can be computed correctly", () => {
   const a = [2, 3, 3, 4]
 
   const bTrue = [
-    { item: 2, count: 1, percentage: 0.25 },
-    { item: 3, count: 2, percentage: 0.5 },
-    { item: 4, count: 1, percentage: 0.25 },
+    { value: 2, count: 1, percentage: 0.25 },
+    { value: 3, count: 2, percentage: 0.5 },
+    { value: 4, count: 1, percentage: 0.25 },
   ]
 
   const bPred = getPercentages(a)
@@ -29,10 +29,10 @@ test("tests that percentages of items in an array can be computed correctly", ()
       v.percentage = v.count / c.length
       return v
     }),
-    (a, b) => a.item - b.item
+    (a, b) => a.value - b.value
   )
 
-  const dPred = sort(getPercentages(c), (a, b) => a.item - b.item)
+  const dPred = sort(getPercentages(c), (a, b) => a.value - b.value)
   expect(isEqual(dPred, dTrue)).toBe(true)
 
   const e = new Series({ hello: round(normal(100)) })
@@ -62,7 +62,7 @@ test("tests that percentages of items in an array can be computed correctly", ()
     { hello: "world" },
   ]
 
-  wrongs.forEach(item => {
-    expect(() => getPercentages(item)).toThrow()
+  wrongs.forEach(value => {
+    expect(() => getPercentages(value)).toThrow()
   })
 })

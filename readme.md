@@ -134,7 +134,7 @@ Returns a matrix containing the _p_-values of every column in `a` against every 
 
 ### `getPercentages(x)`
 
-Returns an array in which each value is an object representing a unique value in `x` with the properties `item`, `count`, and `percentages`. For example:
+Returns an array in which each value is an object representing a unique value in `x` with the properties `value`, `count`, and `percentages`. For example:
 
 ```js
 const { getPercentages } = require("@jrc03c/js-data-science-helpers")
@@ -143,9 +143,9 @@ const x = ["a", "a", "b", "c"]
 const percentages = getPercentages(x)
 console.log(percentages)
 // [
-//   { item: "a", count: 2, percentage: 0.5 },
-//   { item: "b", count: 1, percentage: 0.25 },
-//   { item: "c", count: 1, percentage: 0.25 }
+//   { value: "a", count: 2, percentage: 0.5 },
+//   { value: "b", count: 1, percentage: 0.25 },
+//   { value: "c", count: 1, percentage: 0.25 }
 // ]
 ```
 

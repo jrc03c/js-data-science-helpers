@@ -13,6 +13,7 @@
   "author": "jrc03c",
   "license": "ISC",
   "dependencies": {
+    "@jrc03c/js-data-science-helpers": "^0.0.54",
     "@jrc03c/js-math-tools": "github:jrc03c/js-math-tools",
     "@jrc03c/js-text-tools": "^0.0.5",
     "@jrc03c/make-key": "github:jrc03c/make-key"

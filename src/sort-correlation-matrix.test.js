@@ -72,37 +72,45 @@ test("sorts a random correlation matrix", () => {
     const j = int(random() * e.shape[1])
 
     const v = possibles[int(random() * possibles.length)]
-    e.values[i][j] = v
-    e.values[j][i] = v
-    nans.push(v)
+
+    if (isNumber(e.values[i][j])) {
+      e.values[i][j] = v
+      e.values[j][i] = v
+      nans.push(v)
+    }
   })
 
-  try {
-    const f = sortCorrelationMatrix(e)
-    let containsNaNs = false
+  const f = sortCorrelationMatrix(e)
+  let containsNaNs = false
 
-    f.values.forEach(row => {
-      row.forEach(v => {
-        if (!isNumber(v)) {
-          containsNaNs = true
-        }
-      })
+  f.values.forEach(row => {
+    row.forEach(v => {
+      if (!isNumber(v)) {
+        containsNaNs = true
+      }
     })
+  })
 
-    expect(containsNaNs).toBe(true)
-    expect(isEqual(sort(set(e.columns)), sort(set(f.columns)))).toBe(true)
-    expect(isEqual(sort(set(e.index)), sort(set(f.index)))).toBe(true)
+  expect(containsNaNs).toBe(true)
+  expect(isEqual(sort(set(e.columns)), sort(set(f.columns)))).toBe(true)
+  expect(isEqual(sort(set(e.index)), sort(set(f.index)))).toBe(true)
 
-    const eFlat = flatten(e.values)
-
-    nans.forEach(v => {
-      expect(eFlat.some(other => isEqual(v, other))).toBe(true)
-    })
-  } catch (f) {
-    console.log(f)
-    const failed = true
-    expect(failed).toBe(false)
-  }
+  expect(
+    isEqual(
+      sort(
+        set(nans),
+        (a, b) =>
+          possibles.findIndex(v => isEqual(v, a)) -
+          possibles.findIndex(v => isEqual(v, b))
+      ),
+      sort(
+        set(flatten(e).filter(v => !isNumber(v))),
+        (a, b) =>
+          possibles.findIndex(v => isEqual(v, a)) -
+          possibles.findIndex(v => isEqual(v, b))
+      )
+    )
+  ).toBe(true)
 
   const wrongs = [
     0,

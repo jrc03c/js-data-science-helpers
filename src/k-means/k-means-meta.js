@@ -56,10 +56,9 @@ class KMeansMeta {
     self.scoreStopRatio = config.scoreStopRatio || 0.85
     self.modelClass = config.modelClass || KMeansPlusPlus
     self.fittedModel = null
-    self._fitState = null
   }
 
-  fitStep(x, progress) {
+  getFitStepFunction(x, progress) {
     // currently, this method uses the "elbow" method of determining when to
     // stop; but we should probably consider the "silhouette" method as well!
     const self = this
@@ -74,70 +73,71 @@ class KMeansMeta {
       assert(isFunction(progress), "If defined, `progress` must be a function!")
     }
 
-    if (!self._fitState) {
-      self._fitState = {
-        isFinished: false,
-        lastScore: -Infinity,
-        currentIndex: 0,
-      }
-    } else if (self._fitState.isFinished) {
-      return self
+    const state = {
+      isFinished: false,
+      lastScore: -Infinity,
+      currentIndex: 0,
     }
 
-    const k = self.ks[self._fitState.currentIndex]
+    return function fitStep() {
+      const k = self.ks[state.currentIndex]
 
-    const model = new self.modelClass({
-      k,
-      maxRestarts: 10,
-      maxIterations: 20,
-    })
-
-    model.fit(x, p =>
-      progress
-        ? progress((self._fitState.currentIndex + p) / (self.ks.length + 1))
-        : null
-    )
-
-    const score = model.score(x)
-
-    if (score / self._fitState.lastScore > self.scoreStopRatio) {
-      self._fitState.isFinished = true
-      self._fitState.currentIndex--
-    } else {
-      self._fitState.lastScore = score
-
-      if (self._fitState.currentIndex + 1 >= self.ks.length) {
-        self._fitState.isFinished = true
-      } else {
-        self._fitState.currentIndex++
-      }
-    }
-
-    if (self._fitState.isFinished) {
-      self.fittedModel = new self.modelClass({
-        k: self.ks[self._fitState.currentIndex],
-        maxRestarts: self.maxRestarts,
-        maxIterations: self.maxIterations,
+      const model = new self.modelClass({
+        k,
+        maxRestarts: 10,
+        maxIterations: 20,
       })
 
-      self.fittedModel.fit(x, p =>
-        progress ? progress((self.ks.length + p) / (self.ks.length + 1)) : null
+      model.fit(x, p =>
+        progress
+          ? progress((state.currentIndex + p) / (self.ks.length + 1))
+          : null
       )
 
-      if (progress) {
-        progress(1)
-      }
-    }
+      const score = model.score(x)
 
-    return self
+      if (score / state.lastScore > self.scoreStopRatio) {
+        state.isFinished = true
+        state.currentIndex--
+      } else {
+        state.lastScore = score
+
+        if (state.currentIndex + 1 >= self.ks.length) {
+          state.isFinished = true
+        } else {
+          state.currentIndex++
+        }
+      }
+
+      if (state.isFinished) {
+        self.fittedModel = new self.modelClass({
+          k: self.ks[state.currentIndex],
+          maxRestarts: self.maxRestarts,
+          maxIterations: self.maxIterations,
+        })
+
+        self.fittedModel.fit(x, p =>
+          progress
+            ? progress((self.ks.length + p) / (self.ks.length + 1))
+            : null
+        )
+
+        if (progress) {
+          progress(1)
+        }
+      }
+
+      return state
+    }
   }
 
   fit(x, progress) {
     const self = this
-    self._fitState = null
+    const fitStep = self.getFitStepFunction(x, progress)
+    let state
 
-    while (!self._fitState || !self._fitState.isFinished) {
-      self.fitStep(x, progress)
+    while (!state || !state.isFinished) {
+      state = fitStep()
     }
 
     return self

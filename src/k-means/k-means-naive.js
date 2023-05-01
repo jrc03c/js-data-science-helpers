@@ -48,7 +48,6 @@ class KMeansNaive {
     self.maxIterations = config.maxIterations || 100
     self.tolerance = config.tolerance || 1e-4
     self.centroids = null
-    self._fitState = null
   }
 
   initializeCentroids(x) {
@@ -56,7 +55,7 @@ class KMeansNaive {
     return shuffle(x).slice(0, self.k)
   }
 
-  fitStep(x, progress) {
+  getFitStepFunction(x, progress) {
     const self = this
 
     assert(isMatrix(x), "`x` must be a matrix!")
@@ -69,115 +68,107 @@ class KMeansNaive {
       assert(isFunction(progress), "If defined, `progress` must be a function!")
     }
 
-    if (!self._fitState) {
-      const centroids = self.initializeCentroids(x)
+    const centroids = self.initializeCentroids(x)
 
-      self._fitState = {
-        currentRestart: 0,
-        currentIteration: 0,
-        currentCentroids: centroids,
-        bestCentroids: centroids,
-        bestScore: -Infinity,
-        isFinished: false,
-      }
-    } else if (self._fitState.isFinished) {
-      return self
+    const state = {
+      currentRestart: 0,
+      currentIteration: 0,
+      currentCentroids: centroids,
+      bestCentroids: centroids,
+      bestScore: -Infinity,
+      isFinished: false,
     }
 
-    // get the labels for the points
-    const labels = self.predict(x, self._fitState.currentCentroids)
+    return function fitStep() {
+      // get the labels for the points
+      const labels = self.predict(x, state.currentCentroids)
 
-    // average the points in each cluster
-    const sums = []
-    const counts = zeros(self.k)
+      // average the points in each cluster
+      const sums = []
+      const counts = zeros(self.k)
 
-    x.forEach((p, i) => {
-      const k = labels[i]
+      x.forEach((p, i) => {
+        const k = labels[i]
 
-      if (!sums[k]) {
-        sums[k] = zeros(p.length)
-      }
-
-      sums[k] = add(sums[k], p)
-      counts[k]++
-    })
-
-    const newCentroids = range(0, self.k).map(k => {
-      // if for some reason the count for this centroid is 0, then no
-      // points were assigned to this centroid, which means it's no longer
-      // useful; so, instead, we'll just almost-duplicate another centroid
-      // by copying it and adding a little bit of noise to it
-      if (counts[k] === 0) {
-        return add(
-          self._fitState.currentCentroids[
-            parseInt(random() * self._fitState.currentCentroids.length)
-          ],
-          scale(0.001, normal(self._fitState.currentCentroids[0].length))
-        )
-      } else {
-        return divide(sums[k], counts[k])
-      }
-    })
-
-    // if the change from the previous centroids to these new centroids
-    // is very small (i.e., less then `tolerance`), then we should stop
-    // iterating
-    if (
-      distance(self._fitState.currentCentroids, newCentroids) < self.tolerance
-    ) {
-      self._fitState.currentIteration = self.maxIterations - 1
-    } else {
-      self._fitState.currentCentroids = newCentroids
-    }
-
-    if (progress) {
-      progress(
-        (self._fitState.currentRestart +
-          self._fitState.currentIteration / self.maxIterations) /
-          self.maxRestarts,
-        self
-      )
-    }
-
-    self._fitState.currentIteration++
-
-    if (self._fitState.currentIteration >= self.maxIterations) {
-      const score = self.score(x, self._fitState.currentCentroids)
-
-      if (score > self._fitState.bestScore) {
-        self._fitState.bestScore = score
-
-        self._fitState.bestCentroids = copy(self._fitState.currentCentroids)
-      }
-
-      self._fitState.currentIteration = 0
-      self._fitState.currentRestart++
-
-      if (self._fitState.currentRestart >= self.maxRestarts) {
-        self._fitState.isFinished = true
-        self.centroids = self._fitState.bestCentroids
-
-        if (progress) {
-          progress(1, self)
+        if (!sums[k]) {
+          sums[k] = zeros(p.length)
         }
-      } else {
-        const newCentroids = self.initializeCentroids(x)
-        self._fitState.currentCentroids = newCentroids
-      }
-    }
 
-    return self
+        sums[k] = add(sums[k], p)
+        counts[k]++
+      })
+
+      const newCentroids = range(0, self.k).map(k => {
+        // if for some reason the count for this centroid is 0, then no
+        // points were assigned to this centroid, which means it's no longer
+        // useful; so, instead, we'll just almost-duplicate another centroid
+        // by copying it and adding a little bit of noise to it
+        if (counts[k] === 0) {
+          return add(
+            state.currentCentroids[
+              parseInt(random() * state.currentCentroids.length)
+            ],
+            scale(0.001, normal(state.currentCentroids[0].length))
+          )
+        } else {
+          return divide(sums[k], counts[k])
+        }
+      })
+
+      // if the change from the previous centroids to these new centroids
+      // is very small (i.e., less then `tolerance`), then we should stop
+      // iterating
+      if (distance(state.currentCentroids, newCentroids) < self.tolerance) {
+        state.currentIteration = self.maxIterations - 1
+      } else {
+        state.currentCentroids = newCentroids
+      }
+
+      if (progress) {
+        progress(
+          (state.currentRestart + state.currentIteration / self.maxIterations) /
+            self.maxRestarts,
+          self
+        )
+      }
+
+      state.currentIteration++
+
+      if (state.currentIteration >= self.maxIterations) {
+        const score = self.score(x, state.currentCentroids)
+
+        if (score > state.bestScore) {
+          state.bestScore = score
+          state.bestCentroids = copy(state.currentCentroids)
+        }
+
+        state.currentIteration = 0
+        state.currentRestart++
+
+        if (state.currentRestart >= self.maxRestarts) {
+          state.isFinished = true
+          self.centroids = state.bestCentroids
+
+          if (progress) {
+            progress(1, self)
+          }
+        } else {
+          const newCentroids = self.initializeCentroids(x)
+          state.currentCentroids = newCentroids
+        }
+      }
+
+      return state
+    }
   }
 
   fit(x, progress) {
     const self = this
+    const fitStep = self.getFitStepFunction(x, progress)
+    let state
 
-    if (self._fitState) {
-      self._fitState = null
-    }
-
-    while (!self._fitState || !self._fitState.isFinished) {
-      self.fitStep(x, progress)
+    while (!state || !state.isFinished) {
+      state = fitStep()
     }
 
     return self

@@ -234,6 +234,22 @@ The constructor for the meta model takes a configuration object argument. There 
 
 Fits the model to the two-dimensional data, `x`. Optionally, a `progress` callback function can be provided. This function takes a single argument that represents the overall completion of the `fit` method (in terms of restarts and iterations) expressed as a fraction between 0 and 1.
 
+#### `(KMeansPlusPlus || KMeansMeta).getFitStepFunction(x, progress)`
+
+Returns a function that updates the fitting state. Most of the time, you'll probably want to use the `fit` method. But there may be cases where it's preferable to use a step function that slowly increments the fitting state, like when drawing an animation of the fitting process or when trying to avoid locking up the browser window. Here's an example of how to use it:
+
+```js
+// set up model, then:
+const fitStep = model.getFitStepFunction(x, progress)
+let state
+
+while (!state || !state.isFinished) {
+  state = fitStep()
+}
+
+// done!
+```
+
 #### `(KMeansPlusPlus || KMeansMeta).predict(x, centroids)`
 
 Returns the labels for each point in `x`. A label is an index into the model's `centroids` array. Optionally, an alternative set of `centroids` can be supplied as the second argument.

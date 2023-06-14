@@ -1,6 +1,6 @@
 {
   "name": "@jrc03c/js-data-science-helpers",
-  "version": "0.0.59",
+  "version": "0.0.60",
   "description": "some data science functions and classes to complement @jrc03c/js-math-tools",
   "main": "src/index.js",
   "scripts": {

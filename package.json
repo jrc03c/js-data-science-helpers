@@ -13,9 +13,9 @@
   "author": "jrc03c",
   "license": "ISC",
   "dependencies": {
-    "@jrc03c/js-math-tools": "github:jrc03c/js-math-tools",
-    "@jrc03c/js-text-tools": "^0.0.5",
-    "@jrc03c/make-key": "github:jrc03c/make-key"
+    "@jrc03c/js-math-tools": "^0.0.58",
+    "@jrc03c/js-text-tools": "^0.0.23",
+    "@jrc03c/make-key": "^0.0.14"
   },
   "devDependencies": {
     "esbuild": "^0.14.42",

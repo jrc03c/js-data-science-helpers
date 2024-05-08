@@ -2,11 +2,12 @@ const {
   add,
   argmin,
   assert,
+  distance,
   flatten,
+  int,
   isArray,
   isDataFrame,
   isEqual,
-  int,
   isNumber,
   isSeries,
   normal,
@@ -17,6 +18,7 @@ const {
   shape,
   subtract,
   sum,
+  zeros,
 } = require("@jrc03c/js-math-tools")
 
 const trainTestSplit = require("../train-test-split")
@@ -44,6 +46,20 @@ function accuracy(yTrue, yPred) {
   })
 
   return correct / yTrueFlat.length
+}
+
+function getDistanceMatrix(points) {
+  const out = zeros([points.length, points.length])
+
+  for (let i = 0; i < points.length - 1; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      const d = distance(points[i], points[j])
+      out[i][j] = d
+      out[j][i] = d
+    }
+  }
+
+  return out
 }
 
 function createGenericTest(Model) {
@@ -95,6 +111,7 @@ function sse(xtrue, xpred) {
 module.exports = {
   accuracy,
   createGenericTest,
+  getDistanceMatrix,
   isMatrix,
   isWholeNumber,
   orderCentroids,

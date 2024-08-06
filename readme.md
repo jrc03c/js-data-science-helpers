@@ -1,3 +1,7 @@
+> ⚠️ **NOTE:** ⚠️ This project is being merged into a monorepo [here](https://github.com/jrc03c/monorepo/tree/main/packages/js-data-science-helpers). This repo will soon be archived.
+
+---
+
 # Intro
 
 This is just a little library of helper functions for doing data science stuff in JS. It's probably not very well written.
